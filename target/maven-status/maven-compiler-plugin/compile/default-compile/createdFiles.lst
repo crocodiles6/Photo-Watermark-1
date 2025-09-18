@@ -1,0 +1,5 @@
+com\photowatermark\ExifExtractor.class
+com\photowatermark\InputParser.class
+com\photowatermark\PhotoWatermarkApp.class
+com\photowatermark\WatermarkProcessor$Position.class
+com\photowatermark\WatermarkProcessor.class
