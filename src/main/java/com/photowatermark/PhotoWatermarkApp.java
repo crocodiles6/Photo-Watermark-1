@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import org.apache.commons.imaging.ImageReadException;
 
-import com.photowatermark.WatermarkProcessor.Position;
+import com.photowatermark.Position;
 
 /**
  * 图片水印程序主类

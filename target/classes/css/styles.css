@@ -1,0 +1,52 @@
+.main-split-pane {
+    /* 设置SplitPane的样式 */
+    -fx-background-color: #f0f0f0;
+}
+
+/* 左侧面板占窗口宽度的1/4 */
+#leftPanel {
+    -fx-pref-width: 25%;
+    -fx-min-width: 250;
+}
+
+/* 右侧面板占窗口宽度的1/4 */
+#rightPanel {
+    -fx-pref-width: 25%;
+    -fx-min-width: 350;
+}
+
+/* 中间面板占窗口宽度的1/2 */
+#centerPanel {
+    -fx-pref-width: 50%;
+    -fx-min-width: 500;
+}
+
+/* 文本水印TitledPane占窗口高度的1/2 */
+#textWatermarkPane {
+    -fx-pref-height: 50vh;
+    -fx-min-height: 300;
+}
+
+/* 图片水印TitledPane占窗口高度的1/2 */
+#imageWatermarkPane {
+    -fx-pref-height: 50vh;
+    -fx-min-height: 300;
+}
+
+/* 增加ColorPicker的高度 */
+#textColorPicker {
+    -fx-pref-height: 40px;
+}
+
+/* 确保预览图片随窗口大小变化 */
+#previewImageView {
+    -fx-fit-height: 100%;
+    -fx-fit-width: 100%;
+    -fx-preserve-ratio: true;
+}
+
+/* 确保SplitPane分隔线可以调整 */
+.split-pane-divider {
+    -fx-background-color: #d0d0d0;
+    -fx-padding: 1;
+}

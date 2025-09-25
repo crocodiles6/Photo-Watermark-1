@@ -1,124 +1,199 @@
 package com.photowatermark.gui;
 
-import com.photowatermark.ExifExtractor;
-import com.photowatermark.WatermarkProcessor;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.control.SplitPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
- * 主窗口控制器类，处理所有GUI交互和水印功能
+ * 主窗口控制器类 - 负责UI事件分发和协调各个管理器
  */
 public class MainController {
     // GUI组件引用
     @FXML private ListView<ImageFile> imageListView;
     @FXML private ImageView previewImageView;
     @FXML private TextField watermarkText;
-    @FXML private Slider fontSizeSlider;
-    @FXML private Label fontSizeValue;
+    @FXML private ComboBox<String> fontFamilyComboBox;
+    @FXML private Slider textFontSizeSlider;
+    @FXML private Label textFontSizeValue;
     @FXML private ColorPicker textColorPicker;
-    @FXML private Slider opacitySlider;
-    @FXML private Label opacityValue;
-    @FXML private Slider rotationSlider;
-    @FXML private Label rotationValue;
+    @FXML private Slider textOpacitySlider;
+    @FXML private Label textOpacityValue;
+    @FXML private Slider textRotationSlider;
+    @FXML private Label textRotationValue;
     @FXML private CheckBox enableShadow;
-    @FXML private CheckBox enableTiling;
+    @FXML private CheckBox enableStroke;
     @FXML private CheckBox useExifDate;
     @FXML private ComboBox<String> dateFormatComboBox;
     @FXML private RadioButton textWatermarkRadio;
     @FXML private RadioButton imageWatermarkRadio;
     @FXML private Button selectWatermarkImageBtn;
+    @FXML private Slider imageScaleSlider;
+    @FXML private Label imageScaleValue;
+    @FXML private Slider imageOpacitySlider;
+    @FXML private Label imageOpacityValue;
+    @FXML private Slider imageRotationSlider;
+    @FXML private Label imageRotationValue;
+    @FXML private CheckBox enableTextTiling;
+    @FXML private CheckBox enableImageTiling;
     @FXML private HBox statusBar;
     @FXML private Label statusLabel;
+    @FXML private SplitPane mainSplitPane;
 
-    // 应用数据
-    private final ObservableList<ImageFile> imageFiles = FXCollections.observableArrayList();
-    private ImageFile selectedImageFile;
-    private File watermarkImageFile;
-    private BufferedImage originalImage;
-    private BufferedImage watermarkedImage;
+    // 管理器和服务类
+    private UiUtils uiUtils;
+    private final ImageConverter imageConverter;
+    private final WatermarkService watermarkService;
+    private WatermarkParameterManager parameterManager;
+    private ImageFileManager imageFileManager;
+    private WatermarkProcessor watermarkProcessor;
+    private ExportManager exportManager;
+
     private final ExecutorService executorService = Executors.newFixedThreadPool(4);
-    private final BooleanProperty isProcessing = new SimpleBooleanProperty(false);
 
-    // 水印位置枚举
-    public enum WatermarkPosition {
-        TOP_LEFT, TOP_CENTER, TOP_RIGHT,
-        CENTER_LEFT, CENTER, CENTER_RIGHT,
-        BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
+    public MainController() {
+        // 在构造函数中初始化服务类
+        this.imageConverter = new ImageConverter();
+        this.watermarkService = new WatermarkService();
     }
-
-    private WatermarkPosition currentPosition = WatermarkPosition.BOTTOM_RIGHT;
 
     /**
      * 初始化控制器
      */
     @FXML
     public void initialize() {
+        // 初始化UI工具类
+        this.uiUtils = new UiUtils(statusLabel);
+        
+        // 初始化各个管理器
+        this.parameterManager = new WatermarkParameterManager(
+                watermarkText, fontFamilyComboBox, textFontSizeSlider, textColorPicker,
+                textOpacitySlider, textRotationSlider, enableShadow, enableStroke,
+                useExifDate, dateFormatComboBox, imageScaleSlider, imageOpacitySlider,
+                imageRotationSlider, enableTextTiling, enableImageTiling
+        );
+        
+        this.imageFileManager = new ImageFileManager(previewImageView, uiUtils, imageConverter);
+        this.watermarkProcessor = new WatermarkProcessor(
+                watermarkService, parameterManager, imageFileManager, uiUtils, executorService
+        );
+        this.exportManager = new ExportManager(uiUtils, imageConverter);
+        
         // 设置图片列表
-        imageListView.setItems(imageFiles);
+        imageListView.setItems(imageFileManager.getImageFiles());
         imageListView.setCellFactory(param -> new ImageListCell());
         imageListView.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> handleImageSelection(newValue));
+                (observable, oldValue, newValue) -> imageFileManager.setSelectedImageFile(newValue));
 
-        // 绑定滑块与标签
-        fontSizeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            fontSizeValue.setText(String.format("%.0f", newVal));
-            updatePreviewIfPossible();
-        });
-        opacitySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            opacityValue.setText(String.format("%.1f", newVal));
-            updatePreviewIfPossible();
-        });
-        rotationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            rotationValue.setText(String.format("%.0f°", newVal));
-            updatePreviewIfPossible();
-        });
-
+        // 绑定滑块与标签的更新
+        bindSliderLabels();
+        
         // 水印类型切换
-        textWatermarkRadio.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            selectWatermarkImageBtn.setDisable(newVal);
-            updatePreviewIfPossible();
-        });
+        if (textWatermarkRadio != null) {
+            textWatermarkRadio.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                selectWatermarkImageBtn.setDisable(newVal);
+            });
+        }
 
         // 日期水印选项变更
+        setupExifDateHandling();
+        
+        // 初始状态更新
+        watermarkText.setDisable(useExifDate.isSelected());
+        selectWatermarkImageBtn.setDisable(false); // 允许随时选择图片水印
+        
+        // 设置SplitPane初始分隔位置
+        if (mainSplitPane != null) {
+            mainSplitPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    // 当场景大小变化时更新SplitPane分隔位置
+                    newScene.widthProperty().addListener((widthObs, oldWidth, newWidth) -> {
+                        updateSplitPaneDividers();
+                    });
+                    
+                    // 当窗口首次显示时更新SplitPane分隔位置
+                    Platform.runLater(this::updateSplitPaneDividers);
+                }
+            });
+        }
+    }
+    
+    /**
+     * 更新SplitPane分隔位置，确保左右面板各占窗口宽度的1/4
+     */
+    private void updateSplitPaneDividers() {
+        if (mainSplitPane != null && mainSplitPane.getScene() != null) {
+            double totalWidth = mainSplitPane.getScene().getWidth();
+            if (totalWidth > 0) {
+                // 计算分隔线位置
+                double leftPaneWidth = totalWidth * 0.25; // 左侧面板占25%
+                double rightPaneWidth = totalWidth * 0.25; // 右侧面板占25%
+                
+                // 设置分隔线位置
+                java.util.List<SplitPane.Divider> dividers = mainSplitPane.getDividers();
+                if (dividers.size() >= 2) {
+                    dividers.get(0).setPosition(leftPaneWidth / totalWidth);
+                    dividers.get(1).setPosition((leftPaneWidth + (totalWidth - leftPaneWidth - rightPaneWidth)) / totalWidth);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 绑定滑块与标签
+     */
+    private void bindSliderLabels() {
+        textFontSizeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            textFontSizeValue.setText(String.format("%.0f", newVal));
+            updatePreviewIfPossible();
+        });
+        textOpacitySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            textOpacityValue.setText(String.format("%.1f", newVal));
+            updatePreviewIfPossible();
+        });
+        textRotationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            textRotationValue.setText(String.format("%.0f°", newVal));
+            updatePreviewIfPossible();
+        });
+        
+        imageScaleSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            imageScaleValue.setText(String.format("%.1f", newVal));
+            updatePreviewIfPossible();
+        });
+        imageOpacitySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            imageOpacityValue.setText(String.format("%.1f", newVal));
+            updatePreviewIfPossible();
+        });
+        imageRotationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            imageRotationValue.setText(String.format("%.0f°", newVal));
+            updatePreviewIfPossible();
+        });
+    }
+    
+    /**
+     * 设置EXIF日期处理
+     */
+    private void setupExifDateHandling() {
         useExifDate.selectedProperty().addListener((obs, oldVal, newVal) -> {
             watermarkText.setDisable(newVal);
             
-            // 当复选框从无到有时
             if (newVal && !oldVal) {
-                watermarkText.clear(); // 清除输入框内容
-                if (selectedImageFile != null) {
+                watermarkText.clear();
+                if (imageFileManager.getSelectedImageFile() != null) {
                     try {
-                        String dateStr = ExifExtractor.extractDateTime(selectedImageFile.getFile());
+                        String dateStr = com.photowatermark.ExifExtractor.extractDateTime(imageFileManager.getSelectedImageFile().getFile());
                         if (dateStr != null) {
                             watermarkText.setText(dateStr);
                         } else {
@@ -130,76 +205,12 @@ public class MainController {
                     }
                 }
             } 
-            // 当复选框从有到无时
             else if (!newVal && oldVal) {
-                watermarkText.clear(); // 仅清除输入框内容
-                // 清除预览图片上的水印
-                handleClearWatermark(null);
+                watermarkText.clear();
             }
             
             updatePreviewIfPossible();
         });
-
-        // 其他属性变更监听器
-        textColorPicker.valueProperty().addListener(obs -> updatePreviewIfPossible());
-        enableShadow.selectedProperty().addListener(obs -> updatePreviewIfPossible());
-        enableTiling.selectedProperty().addListener(obs -> updatePreviewIfPossible());
-        watermarkText.textProperty().addListener((obs, oldVal, newVal) -> {
-            // 当文本框内容被清除干净时，清除预览图片上的水印
-            if (newVal == null || newVal.trim().isEmpty()) {
-                handleClearWatermark(null);
-            } else {
-                updatePreviewIfPossible();
-            }
-        });
-
-        // 初始状态更新
-        watermarkText.setDisable(useExifDate.isSelected());
-        selectWatermarkImageBtn.setDisable(textWatermarkRadio.isSelected());
-
-        // 设置处理中状态
-        isProcessing.addListener((obs, oldVal, newVal) -> {
-            Platform.runLater(() -> {
-                statusLabel.setText(newVal ? "处理中..." : "就绪");
-            });
-        });
-    }
-
-    /**
-     * 处理图片选择
-     */
-    private void handleImageSelection(ImageFile imageFile) {
-        if (imageFile == null) return;
-
-        selectedImageFile = imageFile;
-        try {
-            originalImage = ImageIO.read(imageFile.getFile());
-            watermarkedImage = null;
-            
-            // 显示原始图片预览
-            Image fxImage = convertToFxImage(originalImage);
-            previewImageView.setImage(fxImage);
-            
-            // 如果启用了EXIF日期，尝试提取日期
-            if (useExifDate.isSelected()) {
-                try {
-                    String dateStr = ExifExtractor.extractDateTime(imageFile.getFile());
-                    if (dateStr != null) {
-                        watermarkText.setText(dateStr);
-                    } else {
-                        watermarkText.setText("无法提取日期");
-                    }
-                } catch (Exception e) {
-                    watermarkText.setText("日期提取错误");
-                    e.printStackTrace();
-                }
-            }
-            
-            updateStatus("已加载: " + imageFile.getFileName());
-        } catch (IOException e) {
-            showError("加载图片失败", "无法加载图片: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -215,60 +226,7 @@ public class MainController {
         );
         
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(null);
-        if (selectedFiles != null && !selectedFiles.isEmpty()) {
-            List<ImageFile> newImageFiles = selectedFiles.stream()
-                    .map(ImageFile::new)
-                    .collect(Collectors.toList());
-            
-            imageFiles.addAll(newImageFiles);
-            updateStatus("已导入 " + newImageFiles.size() + " 张图片");
-            
-            // 如果是第一次导入，自动选择第一张
-            if (imageFiles.size() == newImageFiles.size()) {
-                imageListView.getSelectionModel().select(0);
-            }
-        }
-    }
-
-    /**
-     * 处理导出图片
-     */
-    @FXML
-    private void handleExportImages(ActionEvent event) {
-        if (watermarkedImage == null) {
-            showWarning("无水印图片", "请先应用水印");
-            return;
-        }
-
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("保存水印图片");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("PNG", "*.png"),
-                new FileChooser.ExtensionFilter("JPEG", "*.jpg", "*.jpeg"),
-                new FileChooser.ExtensionFilter("BMP", "*.bmp")
-        );
-        
-        if (selectedImageFile != null) {
-            String originalName = selectedImageFile.getFileName();
-            String baseName = originalName.substring(0, originalName.lastIndexOf('.'));
-            String extension = originalName.substring(originalName.lastIndexOf('.'));
-            fileChooser.setInitialFileName(baseName + "_watermark" + extension);
-        }
-        
-        File saveFile = fileChooser.showSaveDialog(null);
-        if (saveFile != null) {
-            try {
-                String format = saveFile.getName().substring(saveFile.getName().lastIndexOf('.') + 1).toUpperCase();
-                if ("JPG".equals(format)) format = "JPEG";
-                
-                ImageIO.write(watermarkedImage, format, saveFile);
-                updateStatus("已保存: " + saveFile.getName());
-                showInfo("保存成功", "图片已成功保存到: " + saveFile.getAbsolutePath());
-            } catch (IOException e) {
-                showError("保存失败", "无法保存图片: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
+        imageFileManager.importImageFiles(selectedFiles);
     }
 
     /**
@@ -276,87 +234,13 @@ public class MainController {
      */
     @FXML
     private void handleApplyWatermark(ActionEvent event) {
-        if (originalImage == null) {
-            showWarning("无图片", "请先导入图片");
+        if (!imageFileManager.hasSelectedImage()) {
+            uiUtils.showWarning("无图片", "请先导入图片");
             return;
         }
-
-        applyWatermark();
-    }
-
-    /**
-     * 应用水印并更新预览
-     */
-    private void applyWatermark() {
-        if (originalImage == null) return;
-
-        try {
-            WatermarkProcessor processor = new WatermarkProcessor();
-            
-            if (textWatermarkRadio.isSelected()) {
-                // 文本水印
-                String text = watermarkText.getText();
-                // 只有在未启用EXIF日期且文本为空时才显示警告
-                if (!useExifDate.isSelected() && (text == null || text.trim().isEmpty())) {
-                    // showWarning("无水印文本", "请输入水印文本或启用EXIF日期");
-                    return;
-                }
-                
-                int fontSize = (int) fontSizeSlider.getValue();
-                javafx.scene.paint.Color color = textColorPicker.getValue();
-                float opacity = (float) opacitySlider.getValue();
-                double rotation = rotationSlider.getValue();
-                boolean shadow = enableShadow.isSelected();
-                boolean tiling = enableTiling.isSelected();
-                
-                // 转换JavaFX颜色为AWT颜色
-                java.awt.Color awtColor = new java.awt.Color(
-                        (float) color.getRed(),
-                        (float) color.getGreen(),
-                        (float) color.getBlue(),
-                        opacity
-                );
-                
-                watermarkedImage = processor.addTextWatermark(
-                        originalImage,
-                        text,
-                        awtColor,
-                        fontSize,
-                        currentPosition.name(),
-                        rotation,
-                        shadow,
-                        tiling
-                );
-            } else {
-                // 图片水印
-                if (watermarkImageFile == null || !watermarkImageFile.exists()) {
-                    showWarning("无水印图片", "请先选择水印图片");
-                    return;
-                }
-                
-                BufferedImage watermarkImg = ImageIO.read(watermarkImageFile);
-                float opacity = (float) opacitySlider.getValue();
-                double rotation = rotationSlider.getValue();
-                boolean tiling = enableTiling.isSelected();
-                
-                watermarkedImage = processor.addImageWatermark(
-                        originalImage,
-                        watermarkImg,
-                        opacity,
-                        currentPosition.name(),
-                        rotation,
-                        tiling
-                );
-            }
-            
-            // 更新预览
-            Image fxImage = convertToFxImage(watermarkedImage);
-            Platform.runLater(() -> previewImageView.setImage(fxImage));
-            updateStatus("水印应用成功");
-            
-        } catch (Exception e) {
-            showError("应用水印失败", "无法应用水印: " + e.getMessage());
-            e.printStackTrace();
+        
+        if (watermarkProcessor.validateWatermarkParameters()) {
+            watermarkProcessor.applyWatermark();
         }
     }
 
@@ -365,8 +249,8 @@ public class MainController {
      */
     @FXML
     private void handleBatchWatermark(ActionEvent event) {
-        if (imageFiles.isEmpty()) {
-            showWarning("无图片", "请先导入图片");
+        if (imageFileManager.getImageFiles().isEmpty()) {
+            uiUtils.showWarning("无图片", "请先导入图片");
             return;
         }
 
@@ -379,129 +263,31 @@ public class MainController {
                 exportDir = exportDir.getParentFile();
             }
             
-            if (exportDir == null) return;
-            
-            final File finalExportDir = exportDir;
-            
-            // 在后台线程处理批量任务
-            isProcessing.set(true);
-            executorService.submit(() -> {
-                int successCount = 0;
-                List<String> failedFiles = new ArrayList<>();
-                
-                for (ImageFile imgFile : imageFiles) {
-                    try {
-                        BufferedImage original = ImageIO.read(imgFile.getFile());
-                        BufferedImage watermarked = applyWatermarkToImage(original, imgFile);
-                        
-                        if (watermarked != null) {
-                            String fileName = imgFile.getFileName();
-                            String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toUpperCase();
-                            if ("JPG".equals(extension)) extension = "JPEG";
-                            
-                            File outputFile = new File(finalExportDir, 
-                                    fileName.substring(0, fileName.lastIndexOf('.')) + "_watermark." + 
-                                    extension.toLowerCase());
-                            ImageIO.write(watermarked, extension, outputFile);
-                            successCount++;
-                        }
-                    } catch (Exception e) {
-                        failedFiles.add(imgFile.getFileName());
-                        e.printStackTrace();
-                    }
-                }
-                
-                final int finalSuccessCount = successCount;
-                final List<String> finalFailedFiles = failedFiles;
-                
-                Platform.runLater(() -> {
-                    isProcessing.set(false);
-                    StringBuilder message = new StringBuilder();
-                    message.append("批量处理完成:\n");
-                    message.append("成功: " + finalSuccessCount + " 张\n");
-                    
-                    if (!finalFailedFiles.isEmpty()) {
-                        message.append("失败: " + finalFailedFiles.size() + " 张\n");
-                        message.append("失败文件: " + String.join(", ", finalFailedFiles));
-                    }
-                    
-                    showInfo("批量处理结果", message.toString());
-                    updateStatus("批量水印处理完成");
-                });
-            });
+            if (exportDir != null && watermarkProcessor.validateWatermarkParameters()) {
+                watermarkProcessor.batchApplyWatermark(exportDir);
+            }
         }
     }
 
     /**
-     * 对单个图片应用水印（用于批量处理）
-     */
-    private BufferedImage applyWatermarkToImage(BufferedImage original, ImageFile imageFile) throws Exception {
-        WatermarkProcessor processor = new WatermarkProcessor();
-        
-        if (textWatermarkRadio.isSelected()) {
-            // 处理日期水印
-            String text = watermarkText.getText();
-            if (useExifDate.isSelected()) {
-                String dateStr = ExifExtractor.extractDateTime(imageFile.getFile());
-                if (dateStr != null) {
-                    text = dateStr;
-                }
-            }
-            
-            int fontSize = (int) fontSizeSlider.getValue();
-            javafx.scene.paint.Color color = textColorPicker.getValue();
-            float opacity = (float) opacitySlider.getValue();
-            double rotation = rotationSlider.getValue();
-            boolean shadow = enableShadow.isSelected();
-            boolean tiling = enableTiling.isSelected();
-            
-            java.awt.Color awtColor = new java.awt.Color(
-                    (float) color.getRed(),
-                    (float) color.getGreen(),
-                    (float) color.getBlue(),
-                    opacity
-            );
-            
-            return processor.addTextWatermark(
-                    original,
-                    text,
-                    awtColor,
-                    fontSize,
-                    currentPosition.name(),
-                    rotation,
-                    shadow,
-                    tiling
-            );
-        } else {
-            // 图片水印
-            if (watermarkImageFile == null || !watermarkImageFile.exists()) {
-                throw new IOException("水印图片不存在");
-            }
-            
-            BufferedImage watermarkImg = ImageIO.read(watermarkImageFile);
-            float opacity = (float) opacitySlider.getValue();
-            double rotation = rotationSlider.getValue();
-            boolean tiling = enableTiling.isSelected();
-            
-            return processor.addImageWatermark(
-                    original,
-                    watermarkImg,
-                    opacity,
-                    currentPosition.name(),
-                    rotation,
-                    tiling
-            );
-        }
-    }
-
-    /**
-     * 设置水印位置
+     * 设置文本水印位置
      */
     @FXML
-    private void setWatermarkPosition(ActionEvent event) {
-        javafx.scene.control.Button source = (javafx.scene.control.Button) event.getSource();
+    private void setTextWatermarkPosition(ActionEvent event) {
+        Button source = (Button) event.getSource();
         String positionStr = (String) source.getUserData();
-        currentPosition = WatermarkPosition.valueOf(positionStr);
+        parameterManager.setTextWatermarkPosition(WatermarkPosition.valueOf(positionStr));
+        updatePreviewIfPossible();
+    }
+
+    /**
+     * 设置图片水印位置
+     */
+    @FXML
+    private void setImageWatermarkPosition(ActionEvent event) {
+        Button source = (Button) event.getSource();
+        String positionStr = (String) source.getUserData();
+        parameterManager.setImageWatermarkPosition(WatermarkPosition.valueOf(positionStr));
         updatePreviewIfPossible();
     }
 
@@ -519,8 +305,8 @@ public class MainController {
         
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            watermarkImageFile = selectedFile;
-            updateStatus("已选择水印图片: " + selectedFile.getName());
+            parameterManager.setWatermarkImageFile(selectedFile);
+            uiUtils.updateStatus("已选择水印图片: " + selectedFile.getName());
             updatePreviewIfPossible();
         }
     }
@@ -530,8 +316,7 @@ public class MainController {
      */
     @FXML
     private void handleSaveTemplate(ActionEvent event) {
-        // TODO: 实现水印模板保存功能
-        showInfo("功能开发中", "水印模板保存功能正在开发中");
+        uiUtils.showInfo("功能开发中", "水印模板保存功能正在开发中");
     }
 
     /**
@@ -539,21 +324,21 @@ public class MainController {
      */
     @FXML
     private void handleLoadTemplate(ActionEvent event) {
-        // TODO: 实现水印模板加载功能
-        showInfo("功能开发中", "水印模板加载功能正在开发中");
+        uiUtils.showInfo("功能开发中", "水印模板加载功能正在开发中");
     }
 
     /**
      * 处理清除水印
      */
     @FXML
-    private void handleClearWatermark(ActionEvent event) {
-        if (originalImage != null) {
-            Image fxImage = convertToFxImage(originalImage);
-            previewImageView.setImage(fxImage);
-            watermarkedImage = null;
-            updateStatus("水印已清除");
-        }
+    private void handleClearWatermark() {
+        // 清除水印设置
+        parameterManager.clearWatermarkSettings();
+        
+        // 清除预览中的水印
+        imageFileManager.clearWatermark();
+        
+        uiUtils.updateStatus("水印已清除");
     }
     
     /**
@@ -561,19 +346,33 @@ public class MainController {
      */
     @FXML
     private void handleResetPreview(ActionEvent event) {
-        // 清除预览图片
-        previewImageView.setImage(null);
+        imageFileManager.resetPreview();
+    }
+    
+    /**
+     * 处理导出图片
+     */
+    @FXML
+    private void handleExportImages(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("导出图片");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PNG图片", "*.png"),
+                new FileChooser.ExtensionFilter("JPEG图片", "*.jpg", "*.jpeg"),
+                new FileChooser.ExtensionFilter("BMP图片", "*.bmp")
+        );
         
-        // 清除已导入的图片列表
-        imageFiles.clear();
+        // 设置默认文件名
+        fileChooser.setInitialFileName(exportManager.generateDefaultExportFileName(imageFileManager.getSelectedImageFile()));
         
-        // 重置相关变量
-        selectedImageFile = null;
-        originalImage = null;
-        watermarkedImage = null;
-        
-        // 更新状态提示
-        updateStatus("导入图片已重置");
+        File outputFile = fileChooser.showSaveDialog(null);
+        if (outputFile != null) {
+            exportManager.exportWatermarkedImage(
+                    imageFileManager.getWatermarkedImage(), 
+                    outputFile, 
+                    imageFileManager.getSelectedImageFile()
+            );
+        }
     }
 
     /**
@@ -581,12 +380,14 @@ public class MainController {
      */
     @FXML
     private void handleHelp(ActionEvent event) {
-        showInfo("使用帮助", "Photo Watermark 使用帮助：\n\n" +
+        uiUtils.showInfo("使用帮助", "Photo Watermark 使用帮助：\n\n" +
                 "1. 点击'导入图片'按钮导入需要添加水印的图片\n" +
                 "2. 在右侧面板设置水印参数\n" +
+                "   - 文本水印：设置文字内容、字体、大小、颜色、透明度等\n" +
+                "   - 图片水印：选择水印图片、设置缩放、透明度、旋转等\n" +
                 "3. 点击'应用水印'按钮预览效果\n" +
                 "4. 点击'导出图片'保存水印后的图片\n\n" +
-                "支持文本水印和图片水印，可调整位置、大小、透明度等参数。");
+                "支持同时添加文本水印和图片水印，可独立设置各自的属性。");
     }
 
     /**
@@ -594,7 +395,7 @@ public class MainController {
      */
     @FXML
     private void handleAbout(ActionEvent event) {
-        showInfo("关于", "Photo Watermark 1.0\n\n" +
+        uiUtils.showInfo("关于", "Photo Watermark 1.0\n\n" +
                 "一个简单易用的图片水印工具\n" +
                 "NJUSE 2025 Fall LLM4SE hw1");
     }
@@ -612,99 +413,8 @@ public class MainController {
      * 更新预览（如果可能）
      */
     private void updatePreviewIfPossible() {
-        if (selectedImageFile != null && originalImage != null) {
-            applyWatermark();
-        }
-    }
-
-    /**
-     * 更新状态栏消息
-     */
-    private void updateStatus(String message) {
-        Platform.runLater(() -> statusLabel.setText(message));
-    }
-
-    /**
-     * 显示信息对话框
-     */
-    private void showInfo(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    /**
-     * 显示警告对话框
-     */
-    private void showWarning(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    /**
-     * 显示错误对话框
-     */
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    /**
-     * 将AWT BufferedImage转换为JavaFX Image
-     */
-    private Image convertToFxImage(BufferedImage bufferedImage) {
-        WritableImage writableImage = new WritableImage(
-                bufferedImage.getWidth(), bufferedImage.getHeight());
-        return javafx.embed.swing.SwingFXUtils.toFXImage(bufferedImage, writableImage);
-    }
-
-    /**
-     * 图片文件类，用于ListView显示
-     */
-    public static class ImageFile {
-        private final File file;
-        private final String fileName;
-
-        public ImageFile(File file) {
-            this.file = file;
-            this.fileName = file.getName();
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        @Override
-        public String toString() {
-            return fileName;
-        }
-    }
-
-    /**
-     * 图片列表单元格渲染器
-     */
-    private static class ImageListCell extends ListCell<ImageFile> {
-        @Override
-        protected void updateItem(ImageFile item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                setText(item.getFileName());
-            }
+        if (imageFileManager.hasSelectedImage()) {
+            watermarkProcessor.applyWatermark();
         }
     }
 }

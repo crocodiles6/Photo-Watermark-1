@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.photowatermark.gui.MainController">
+    <!-- 顶部菜单栏 -->
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="文件">
+                    <items>
+                        <MenuItem text="导入图片" onAction="#handleImportImages" />
+                        <MenuItem text="导出图片" onAction="#handleExportImages" />
+                        <SeparatorMenuItem />
+                        <MenuItem text="退出" onAction="#handleExit" />
+                    </items>
+                </Menu>
+                <Menu text="编辑">
+                    <items>
+                        <MenuItem text="保存水印模板" onAction="#handleSaveTemplate" />
+                        <MenuItem text="加载水印模板" onAction="#handleLoadTemplate" />
+                    </items>
+                </Menu>
+                <Menu text="帮助">
+                    <items>
+                        <MenuItem text="使用帮助" onAction="#handleHelp" />
+                        <MenuItem text="关于" onAction="#handleAbout" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
+    <!-- 主要内容区域 -->
+    <center>
+        <SplitPane orientation="HORIZONTAL">
+            <!-- 左侧面板：图片列表 -->
+            <AnchorPane minWidth="250">
+                <SplitPane.resizableWithParent>false</SplitPane.resizableWithParent>
+                <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+                    <Button text="导入图片" onAction="#handleImportImages" prefWidth="Infinity" />
+                    <Button text="批量添加水印" onAction="#handleBatchWatermark" prefWidth="Infinity" />
+                    <Separator />
+                    <Label text="已导入图片：" />
+                    <ListView fx:id="imageListView" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS" />
+                </VBox>
+            </AnchorPane>
+
+            <!-- 中间面板：预览区域 -->
+            <AnchorPane minWidth="500" minHeight="500">
+                <SplitPane.resizableWithParent>true</SplitPane.resizableWithParent>
+                <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+                    <Label text="图片预览：" />
+                    <ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="500" prefWidth="Infinity" VBox.vgrow="ALWAYS">
+                                <content>
+                                    <AnchorPane>
+                                        <children>
+                                            <ImageView fx:id="previewImageView" preserveRatio="true" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" />
+                                        </children>
+                                    </AnchorPane>
+                                </content>
+                            </ScrollPane>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="应用水印" onAction="#handleApplyWatermark" />
+                        <Button text="清除水印" onAction="#handleClearWatermark" />
+                        <Button text="重置图片" onAction="#handleResetPreview" />
+                    </HBox>
+                </VBox>
+            </AnchorPane>
+
+            <!-- 右侧面板：水印设置 -->
+            <AnchorPane minWidth="350">
+                <SplitPane.resizableWithParent>false</SplitPane.resizableWithParent>
+                <VBox spacing="0" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+                    <Label text="水印设置" style="-fx-font-weight: bold;" />
+                    
+                    <!-- 文本水印设置：高度为窗口的1/2 -->
+                    <TitledPane text="文本水印设置" expanded="true" prefHeight="300" minHeight="300">
+                        <SplitPane.resizableWithParent>true</SplitPane.resizableWithParent>
+                        <ScrollPane fitToWidth="true" fitToHeight="false" prefHeight="-1">
+                            <content>
+                                <VBox spacing="10" prefWidth="Infinity">
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="文本内容：" prefWidth="80" />
+                                        <TextField fx:id="watermarkText" promptText="输入水印文本" prefWidth="150" minWidth="150" HBox.hgrow="ALWAYS" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="字体样式：" prefWidth="80" />
+                                        <ComboBox fx:id="fontFamilyComboBox" prefWidth="150">
+                                            <items>
+                                                <FXCollections fx:factory="observableArrayList">
+                                                    <String fx:value="Arial" />
+                                                    <String fx:value="Times New Roman" />
+                                                    <String fx:value="Courier New" />
+                                                    <String fx:value="Microsoft YaHei" />
+                                                    <String fx:value="SimSun" />
+                                                    <String fx:value="SimHei" />
+                                                </FXCollections>
+                                            </items>
+                                        </ComboBox>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="字体大小：" prefWidth="80" />
+                                        <Slider fx:id="textFontSizeSlider" min="12" max="72" value="24" showTickLabels="true" 
+                                                showTickMarks="true" majorTickUnit="12" prefWidth="150" />
+                                        <Label fx:id="textFontSizeValue" text="24" prefWidth="30" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="颜色：" prefWidth="80" />
+                                        <ColorPicker fx:id="textColorPicker" prefWidth="100" prefHeight="40" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="透明度：" prefWidth="80" />
+                                        <Slider fx:id="textOpacitySlider" min="0.1" max="1.0" value="0.5" 
+                                                showTickLabels="true" showTickMarks="true" majorTickUnit="0.1" prefWidth="150" />
+                                        <Label fx:id="textOpacityValue" text="0.5" prefWidth="40" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="旋转角度：" prefWidth="80" />
+                                        <Slider fx:id="textRotationSlider" min="0" max="360" value="0" 
+                                                showTickLabels="true" showTickMarks="true" majorTickUnit="45" prefWidth="150" />
+                                        <Label fx:id="textRotationValue" text="0°" prefWidth="40" />
+                                    </HBox>
+                                    <HBox>
+                                        <CheckBox fx:id="enableShadow" text="添加阴影" />
+                                    </HBox>
+                                    <HBox>
+                                        <CheckBox fx:id="enableStroke" text="添加描边" />
+                                    </HBox>
+                                    <HBox>
+                                        <CheckBox fx:id="useExifDate" text="使用拍摄日期作为水印" />
+                                    </HBox>
+                                    <!-- 文本水印位置设置 -->
+                                    <Label text="位置设置：" style="-fx-font-weight: bold;" />
+                                    <HBox spacing="5">
+                                        <Button text="左上" onAction="#setTextWatermarkPosition" userData="TOP_LEFT" prefWidth="60" />
+                                        <Button text="上中" onAction="#setTextWatermarkPosition" userData="TOP_CENTER" prefWidth="60" />
+                                        <Button text="右上" onAction="#setTextWatermarkPosition" userData="TOP_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox spacing="5">
+                                        <Button text="左中" onAction="#setTextWatermarkPosition" userData="CENTER_LEFT" prefWidth="60" />
+                                        <Button text="居中" onAction="#setTextWatermarkPosition" userData="CENTER" prefWidth="60" />
+                                        <Button text="右中" onAction="#setTextWatermarkPosition" userData="CENTER_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox spacing="5">
+                                        <Button text="左下" onAction="#setTextWatermarkPosition" userData="BOTTOM_LEFT" prefWidth="60" />
+                                        <Button text="下中" onAction="#setTextWatermarkPosition" userData="BOTTOM_CENTER" prefWidth="60" />
+                                        <Button text="右下" onAction="#setTextWatermarkPosition" userData="BOTTOM_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox>
+                                        <CheckBox fx:id="enableTextTiling" text="平铺水印" />
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </TitledPane>
+
+                    <!-- 图片水印设置：高度为窗口的1/2 -->
+                    <TitledPane text="图片水印设置" expanded="true" prefHeight="300" minHeight="300">
+                        <SplitPane.resizableWithParent>true</SplitPane.resizableWithParent>
+                        <ScrollPane fitToWidth="true" fitToHeight="false" prefHeight="-1">
+                            <content>
+                                <VBox spacing="10" prefWidth="Infinity">
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="水印图片：" prefWidth="80" />
+                                        <Button text="选择水印图片" fx:id="selectWatermarkImageBtn" disable="false" 
+                                            onAction="#handleSelectWatermarkImage" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="缩放比例：" prefWidth="80" />
+                                        <Slider fx:id="imageScaleSlider" min="0.1" max="2.0" value="1.0" 
+                                                showTickLabels="true" showTickMarks="true" majorTickUnit="0.2" prefWidth="150" />
+                                        <Label fx:id="imageScaleValue" text="1.0" prefWidth="40" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="透明度：" prefWidth="80" />
+                                        <Slider fx:id="imageOpacitySlider" min="0.1" max="1.0" value="0.5" 
+                                                showTickLabels="true" showTickMarks="true" majorTickUnit="0.1" prefWidth="150" />
+                                        <Label fx:id="imageOpacityValue" text="0.5" prefWidth="40" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" fillHeight="true">
+                                        <Label text="旋转角度：" prefWidth="80" />
+                                        <Slider fx:id="imageRotationSlider" min="0" max="360" value="0" 
+                                                showTickLabels="true" showTickMarks="true" majorTickUnit="45" prefWidth="150" />
+                                        <Label fx:id="imageRotationValue" text="0°" prefWidth="40" />
+                                    </HBox>
+                                    <!-- 图片水印位置设置 -->
+                                    <Label text="位置设置：" style="-fx-font-weight: bold;" />
+                                    <HBox spacing="5">
+                                        <Button text="左上" onAction="#setImageWatermarkPosition" userData="TOP_LEFT" prefWidth="60" />
+                                        <Button text="上中" onAction="#setImageWatermarkPosition" userData="TOP_CENTER" prefWidth="60" />
+                                        <Button text="右上" onAction="#setImageWatermarkPosition" userData="TOP_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox spacing="5">
+                                        <Button text="左中" onAction="#setImageWatermarkPosition" userData="CENTER_LEFT" prefWidth="60" />
+                                        <Button text="居中" onAction="#setImageWatermarkPosition" userData="CENTER" prefWidth="60" />
+                                        <Button text="右中" onAction="#setImageWatermarkPosition" userData="CENTER_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox spacing="5">
+                                        <Button text="左下" onAction="#setImageWatermarkPosition" userData="BOTTOM_LEFT" prefWidth="60" />
+                                        <Button text="下中" onAction="#setImageWatermarkPosition" userData="BOTTOM_CENTER" prefWidth="60" />
+                                        <Button text="右下" onAction="#setImageWatermarkPosition" userData="BOTTOM_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox>
+                                        <CheckBox fx:id="enableImageTiling" text="平铺水印" />
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </TitledPane>
+                </VBox>
+            </AnchorPane>
+        </SplitPane>
+    </center>
+
+    <!-- 底部状态栏 -->
+    <bottom>
+        <HBox fx:id="statusBar" style="-fx-padding: 5; -fx-border-color: lightgray; -fx-border-width: 1 0 0 0;">
+            <Label fx:id="statusLabel" text="就绪" prefWidth="Infinity" />
+        </HBox>
+    </bottom>
+    <!-- 添加CSS样式来实现响应式布局 -->
+    <stylesheets>
+        <String fx:value="/css/styles.css" />
+    </stylesheets>
+</BorderPane>

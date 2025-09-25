@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.photowatermark.WatermarkProcessor.Position;
+import com.photowatermark.Position;
 
 /**
  * 专门负责解析用户输入的工具类
