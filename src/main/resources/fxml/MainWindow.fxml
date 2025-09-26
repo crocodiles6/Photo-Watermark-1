@@ -59,7 +59,7 @@
                     <Label text="图片预览：" />
                     <ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="500" prefWidth="Infinity" VBox.vgrow="ALWAYS">
                                 <content>
-                                    <AnchorPane>
+                                    <AnchorPane onDragOver="#handleDragOver" onDragDropped="#handleDragDropped">
                                         <children>
                                             <ImageView fx:id="previewImageView" preserveRatio="true" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" />
                                         </children>

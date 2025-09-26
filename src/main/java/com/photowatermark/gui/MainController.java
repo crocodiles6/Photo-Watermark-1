@@ -7,6 +7,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.SplitPane;
@@ -14,6 +17,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -469,6 +473,58 @@ public class MainController {
         Platform.exit();
     }
 
+    /**
+     * 更新预览（如果可能）
+     */
+    /**
+     * 处理拖拽经过事件
+     */
+    @FXML
+    private void handleDragOver(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        // 检查是否包含文件，且至少有一个是图片文件
+        if (db.hasFiles() && !db.getFiles().isEmpty()) {
+            File file = db.getFiles().get(0);
+            if (isImageFile(file)) {
+                event.acceptTransferModes(TransferMode.COPY);
+            }
+        }
+        event.consume();
+    }
+
+    /**
+     * 处理拖拽释放事件
+     */
+    @FXML
+    private void handleDragDropped(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        boolean success = false;
+        
+        if (db.hasFiles() && !db.getFiles().isEmpty()) {
+            File file = db.getFiles().get(0);
+            if (isImageFile(file)) {
+                // 使用现有的imageFileManager导入单个图片文件
+                imageFileManager.importImageFiles(Arrays.asList(file));
+                success = true;
+            } else {
+                uiUtils.showWarning("不支持的文件格式", "请导入有效的图片文件");
+            }
+        }
+        
+        event.setDropCompleted(success);
+        event.consume();
+    }
+
+    /**
+     * 检查文件是否为图片文件
+     */
+    private boolean isImageFile(File file) {
+        String fileName = file.getName().toLowerCase();
+        return fileName.endsWith(".png") || fileName.endsWith(".jpg") || 
+               fileName.endsWith(".jpeg") || fileName.endsWith(".bmp") || 
+               fileName.endsWith(".tiff");
+    }
+    
     /**
      * 更新预览（如果可能）
      */

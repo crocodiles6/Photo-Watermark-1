@@ -23,19 +23,19 @@
 
 /* 文本水印TitledPane占窗口高度的1/2 */
 #textWatermarkPane {
-    -fx-pref-height: 50%;
+    -fx-pref-height: 50vh;
     -fx-min-height: 300;
 }
 
 /* 图片水印TitledPane占窗口高度的1/2 */
 #imageWatermarkPane {
-    -fx-pref-height: 50%;
+    -fx-pref-height: 50vh;
     -fx-min-height: 300;
 }
 
 /* 增加ColorPicker的高度 */
 #textColorPicker {
-    -fx-pref-height: 30px;
+    -fx-pref-height: 40px;
 }
 
 /* 确保预览图片随窗口大小变化 */

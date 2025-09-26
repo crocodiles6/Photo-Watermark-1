@@ -1,4 +1,6 @@
+com\photowatermark\gui\MainController.class
 com\photowatermark\TextWatermarkProcessor.class
+com\photowatermark\gui\ExportDialog.class
 com\photowatermark\WatermarkProcessor.class
 com\photowatermark\gui\WatermarkService.class
 com\photowatermark\InputParser.class
@@ -13,6 +15,7 @@ com\photowatermark\gui\ImageFile.class
 com\photowatermark\gui\MainApp.class
 com\photowatermark\gui\WatermarkProcessor.class
 com\photowatermark\ExifExtractor.class
+com\photowatermark\gui\ExportDialog$ExportDialogResult.class
 com\photowatermark\gui\ImageConverter.class
 com\photowatermark\PhotoWatermarkApp.class
 com\photowatermark\Position.class
