@@ -136,7 +136,7 @@
                                         <CheckBox fx:id="enableShadow" text="添加阴影" />
                                     </HBox>
                                     <HBox>
-                                        <CheckBox fx:id="enableStroke" text="添加描边" />
+                                        <CheckBox fx:id="enableStroke" text="添加描边（颜色加深）" />
                                     </HBox>
                                     <HBox>
                                         <CheckBox fx:id="useExifDate" text="使用拍摄日期作为水印" />
