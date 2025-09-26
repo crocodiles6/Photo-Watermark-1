@@ -21,7 +21,7 @@ public class ExportManager {
     /**
      * 导出带有水印的图片
      */
-    public void exportWatermarkedImage(BufferedImage watermarkedImage, File outputFile, ImageFile selectedImageFile) {
+    public void exportWatermarkedImage(BufferedImage watermarkedImage, File outputFile, ImageFile selectedImageFile, int scalePercentage) {
         if (watermarkedImage == null) {
             uiUtils.showWarning("无水印图片", "请先应用水印");
             return;
@@ -35,8 +35,11 @@ public class ExportManager {
                 extension = "JPEG";
             }
             
+            // 先进行缩放
+            BufferedImage scaledImage = scaleImage(watermarkedImage, scalePercentage);
+            
             // 根据目标格式进行必要的格式转换
-            BufferedImage imageToExport = convertImageFormatIfNeeded(watermarkedImage, extension);
+            BufferedImage imageToExport = convertImageFormatIfNeeded(scaledImage, extension);
             
             // 写入文件
             ImageIO.write(imageToExport, extension, outputFile);
@@ -46,6 +49,32 @@ public class ExportManager {
             uiUtils.showError("导出失败", "无法导出图片：" + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * 按照指定百分比缩放图片
+     */
+    private BufferedImage scaleImage(BufferedImage source, int scalePercentage) {
+        if (scalePercentage == 100) {
+            // 如果是100%，直接返回原图，避免不必要的处理
+            return source;
+        }
+        
+        // 计算新尺寸
+        int newWidth = (int) (source.getWidth() * scalePercentage / 100.0);
+        int newHeight = (int) (source.getHeight() * scalePercentage / 100.0);
+        
+        // 创建缩放后的图片
+        BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, source.getType());
+        
+        // 绘制并缩放
+        java.awt.Graphics2D g = scaledImage.createGraphics();
+        g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, 
+                          java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(source, 0, 0, newWidth, newHeight, null);
+        g.dispose();
+        
+        return scaledImage;
     }
     
     /**

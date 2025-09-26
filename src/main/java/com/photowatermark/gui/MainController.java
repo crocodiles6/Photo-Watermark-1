@@ -437,7 +437,8 @@ public class MainController {
                             exportManager.exportWatermarkedImage(
                                     imageFileManager.getWatermarkedImage(),
                                     outputFile,
-                                    imageFileManager.getSelectedImageFile()
+                                    imageFileManager.getSelectedImageFile(),
+                                    result.getScalePercentage()
                             );
                         }
                     });
@@ -446,7 +447,8 @@ public class MainController {
                     exportManager.exportWatermarkedImage(
                             imageFileManager.getWatermarkedImage(),
                             outputFile,
-                            imageFileManager.getSelectedImageFile()
+                            imageFileManager.getSelectedImageFile(),
+                            result.getScalePercentage()
                     );
                 }
             } catch (Exception e) {

@@ -28,6 +28,7 @@ public class ExportDialog {
         private File exportDirectory;
         private String fileName;
         private String format;
+        private int scalePercentage = 100; // 默认100%
         private boolean confirmed = false;
         
         public File getExportDirectory() {
@@ -52,6 +53,14 @@ public class ExportDialog {
         
         public void setFormat(String format) {
             this.format = format;
+        }
+        
+        public int getScalePercentage() {
+            return scalePercentage;
+        }
+        
+        public void setScalePercentage(int scalePercentage) {
+            this.scalePercentage = scalePercentage;
         }
         
         public boolean isConfirmed() {
@@ -152,6 +161,25 @@ public class ExportDialog {
         formatComboBox.getItems().addAll("PNG", "JPEG");
         formatComboBox.getSelectionModel().select(0); // 默认选择PNG
         
+        // 图片缩放设置
+        Label scaleLabel = new Label("缩放比例：");
+        Slider scaleSlider = new Slider(10, 200, 100); // 10% - 200%，默认100%
+        scaleSlider.setShowTickMarks(true);
+        scaleSlider.setShowTickLabels(true);
+        scaleSlider.setMajorTickUnit(50);
+        scaleSlider.setMinorTickCount(5);
+        scaleSlider.setSnapToTicks(true);
+        
+        Label scaleValueLabel = new Label("100%");
+        scaleSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            int scaleValue = (int) newValue.intValue();
+            scaleValueLabel.setText(scaleValue + "%");
+        });
+        
+        HBox scaleBox = new HBox(10);
+        scaleBox.getChildren().addAll(scaleSlider, scaleValueLabel);
+        scaleBox.setHgrow(scaleSlider, Priority.ALWAYS);
+        
         // 按钮
         Button confirmButton = new Button("确定");
         Button cancelButton = new Button("取消");
@@ -169,6 +197,7 @@ public class ExportDialog {
             // 设置结果
             result.setFileName(fileNameField.getText());
             result.setFormat(formatComboBox.getValue());
+            result.setScalePercentage((int) scaleSlider.getValue());
             result.setConfirmed(true);
             dialogStage.close();
         });
@@ -190,7 +219,9 @@ public class ExportDialog {
         grid.add(fileNameOptionsBox, 1, 2);
         grid.add(formatLabel, 0, 3);
         grid.add(formatComboBox, 1, 3);
-        grid.add(buttonBox, 1, 4);
+        grid.add(scaleLabel, 0, 4);
+        grid.add(scaleBox, 1, 4);
+        grid.add(buttonBox, 1, 5);
         
         // 设置列约束，使第二列可以水平扩展
         ColumnConstraints column1 = new ColumnConstraints();
