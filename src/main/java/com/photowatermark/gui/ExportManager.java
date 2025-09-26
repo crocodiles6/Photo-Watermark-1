@@ -2,9 +2,14 @@ package com.photowatermark.gui;
 
 import javafx.scene.image.WritableImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.IIOImage;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * 导出管理器 - 负责处理图片的导出功能
@@ -21,7 +26,7 @@ public class ExportManager {
     /**
      * 导出带有水印的图片
      */
-    public void exportWatermarkedImage(BufferedImage watermarkedImage, File outputFile, ImageFile selectedImageFile, int scalePercentage) {
+    public void exportWatermarkedImage(BufferedImage watermarkedImage, File outputFile, ImageFile selectedImageFile, int scalePercentage, int jpegQuality) {
         if (watermarkedImage == null) {
             uiUtils.showWarning("无水印图片", "请先应用水印");
             return;
@@ -42,12 +47,52 @@ public class ExportManager {
             BufferedImage imageToExport = convertImageFormatIfNeeded(scaledImage, extension);
             
             // 写入文件
-            ImageIO.write(imageToExport, extension, outputFile);
+            if ("JPEG".equals(extension)) {
+                // 对于JPEG格式，使用质量参数
+                saveJpegWithQuality(imageToExport, outputFile, jpegQuality);
+            } else {
+                // 对于其他格式，直接保存
+                ImageIO.write(imageToExport, extension, outputFile);
+            }
+            
             uiUtils.showInfo("导出成功", "图片已成功导出到：" + outputFile.getAbsolutePath());
             uiUtils.updateStatus("已导出图片：" + outputFile.getName());
         } catch (IOException e) {
             uiUtils.showError("导出失败", "无法导出图片：" + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 按照指定质量保存JPEG图片
+     */
+    private void saveJpegWithQuality(BufferedImage image, File outputFile, int quality) throws IOException {
+        // 获取JPEG ImageWriter
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        if (!writers.hasNext()) {
+            // 如果无法获取writer，降级处理
+            ImageIO.write(image, "jpg", outputFile);
+            return;
+        }
+        
+        ImageWriter writer = writers.next();
+        ImageWriteParam writeParam = writer.getDefaultWriteParam();
+        
+        // 设置压缩模式和质量参数
+        writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        // 将0-100的范围转换为0.0-1.0
+        float qualityFloat = quality / 100.0f;
+        writeParam.setCompressionQuality(qualityFloat);
+        
+        try {
+            // 创建输出流并写入
+            writer.setOutput(ImageIO.createImageOutputStream(outputFile));
+            // 创建IIOImage对象
+            IIOImage iioImage = new IIOImage(image, null, null);
+            // 写入图像
+            writer.write(null, iioImage, writeParam);
+        } finally {
+            writer.dispose();
         }
     }
     

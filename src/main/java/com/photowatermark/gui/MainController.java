@@ -438,7 +438,8 @@ public class MainController {
                                     imageFileManager.getWatermarkedImage(),
                                     outputFile,
                                     imageFileManager.getSelectedImageFile(),
-                                    result.getScalePercentage()
+                                    result.getScalePercentage(),
+                                    result.getJpegQuality()
                             );
                         }
                     });
@@ -448,7 +449,8 @@ public class MainController {
                             imageFileManager.getWatermarkedImage(),
                             outputFile,
                             imageFileManager.getSelectedImageFile(),
-                            result.getScalePercentage()
+                            result.getScalePercentage(),
+                            result.getJpegQuality()
                     );
                 }
             } catch (Exception e) {

@@ -29,6 +29,7 @@ public class ExportDialog {
         private String fileName;
         private String format;
         private int scalePercentage = 100; // 默认100%
+        private int jpegQuality = 90; // 默认90%质量
         private boolean confirmed = false;
         
         public File getExportDirectory() {
@@ -61,6 +62,14 @@ public class ExportDialog {
         
         public void setScalePercentage(int scalePercentage) {
             this.scalePercentage = scalePercentage;
+        }
+        
+        public int getJpegQuality() {
+            return jpegQuality;
+        }
+        
+        public void setJpegQuality(int jpegQuality) {
+            this.jpegQuality = jpegQuality;
         }
         
         public boolean isConfirmed() {
@@ -180,6 +189,33 @@ public class ExportDialog {
         scaleBox.getChildren().addAll(scaleSlider, scaleValueLabel);
         scaleBox.setHgrow(scaleSlider, Priority.ALWAYS);
         
+        // JPEG质量设置
+        Label qualityLabel = new Label("JPEG质量：");
+        Slider qualitySlider = new Slider(0, 100, 90); // 0-100，默认90%
+        qualitySlider.setShowTickMarks(true);
+        qualitySlider.setShowTickLabels(true);
+        qualitySlider.setMajorTickUnit(20);
+        qualitySlider.setMinorTickCount(4);
+        qualitySlider.setSnapToTicks(true);
+        qualitySlider.setDisable(true); // 初始禁用
+        
+        Label qualityValueLabel = new Label("90%");
+        qualitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            int qualityValue = (int) newValue.intValue();
+            qualityValueLabel.setText(qualityValue + "%");
+        });
+        
+        HBox qualityBox = new HBox(10);
+        qualityBox.getChildren().addAll(qualitySlider, qualityValueLabel);
+        qualityBox.setHgrow(qualitySlider, Priority.ALWAYS);
+        
+        // 根据导出格式启用/禁用质量滑块
+        formatComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            boolean isJpeg = "JPEG".equals(newValue);
+            qualitySlider.setDisable(!isJpeg);
+            qualityLabel.setDisable(!isJpeg);
+        });
+        
         // 按钮
         Button confirmButton = new Button("确定");
         Button cancelButton = new Button("取消");
@@ -198,6 +234,7 @@ public class ExportDialog {
             result.setFileName(fileNameField.getText());
             result.setFormat(formatComboBox.getValue());
             result.setScalePercentage((int) scaleSlider.getValue());
+            result.setJpegQuality((int) qualitySlider.getValue());
             result.setConfirmed(true);
             dialogStage.close();
         });
@@ -221,7 +258,9 @@ public class ExportDialog {
         grid.add(formatComboBox, 1, 3);
         grid.add(scaleLabel, 0, 4);
         grid.add(scaleBox, 1, 4);
-        grid.add(buttonBox, 1, 5);
+        grid.add(qualityLabel, 0, 5);
+        grid.add(qualityBox, 1, 5);
+        grid.add(buttonBox, 1, 6);
         
         // 设置列约束，使第二列可以水平扩展
         ColumnConstraints column1 = new ColumnConstraints();
