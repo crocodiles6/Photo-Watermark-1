@@ -13,6 +13,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.SplitPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -262,6 +263,22 @@ public class MainController {
         
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(null);
         imageFileManager.importImageFiles(selectedFiles);
+    }
+    
+    /**
+     * 处理从文件夹导入图片
+     */
+    @FXML
+    private void handleImportFromFolder(ActionEvent event) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("选择图片文件夹");
+        
+        // 显示文件夹选择对话框
+        File selectedFolder = directoryChooser.showDialog(null);
+        if (selectedFolder != null) {
+            // 调用ImageFileManager从文件夹导入图片
+            imageFileManager.importImagesFromFolder(selectedFolder);
+        }
     }
 
     /**

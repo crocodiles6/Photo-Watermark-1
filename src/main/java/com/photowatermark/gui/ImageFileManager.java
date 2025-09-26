@@ -11,7 +11,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +32,10 @@ public class ImageFileManager {
     
     // 服务类
     private final ImageConverter imageConverter;
+    
+    // 支持的图片文件扩展名
+    private static final List<String> SUPPORTED_IMAGE_EXTENSIONS = Arrays.asList(
+            "png", "jpg", "jpeg", "bmp", "tiff");
     
     public ImageFileManager(ImageView previewImageView, UiUtils uiUtils, ImageConverter imageConverter) {
         this.previewImageView = previewImageView;
@@ -82,6 +88,55 @@ public class ImageFileManager {
         if (imageFiles.size() == newImageFiles.size() && !imageFiles.isEmpty()) {
             selectedImageFileProperty.set(imageFiles.get(0));
         }
+    }
+    
+    /**
+     * 从文件夹导入图片文件（不包括子目录）
+     */
+    public void importImagesFromFolder(File folder) {
+        if (folder == null || !folder.isDirectory()) {
+            return;
+        }
+        
+        // 获取文件夹中的所有文件
+        File[] files = folder.listFiles();
+        if (files == null || files.length == 0) {
+            uiUtils.updateStatus("选择的文件夹中没有文件");
+            return;
+        }
+        
+        // 过滤出支持的图片文件
+        List<File> imageFiles = Arrays.stream(files)
+                .filter(file -> file.isFile() && isSupportedImageFile(file))
+                .collect(Collectors.toList());
+        
+        if (imageFiles.isEmpty()) {
+            uiUtils.updateStatus("选择的文件夹中没有支持的图片文件");
+            return;
+        }
+        
+        // 导入过滤后的图片文件
+        importImageFiles(imageFiles);
+    }
+    
+    /**
+     * 检查文件是否为支持的图片格式
+     */
+    private boolean isSupportedImageFile(File file) {
+        String extension = getFileExtension(file).toLowerCase(Locale.ROOT);
+        return SUPPORTED_IMAGE_EXTENSIONS.contains(extension);
+    }
+    
+    /**
+     * 获取文件扩展名
+     */
+    private String getFileExtension(File file) {
+        String name = file.getName();
+        int lastDotIndex = name.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < name.length() - 1) {
+            return name.substring(lastDotIndex + 1);
+        }
+        return "";
     }
     
     /**

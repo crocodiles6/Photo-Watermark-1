@@ -16,6 +16,7 @@
                 <Menu text="文件">
                     <items>
                         <MenuItem text="导入图片" onAction="#handleImportImages" />
+                        <MenuItem text="从文件夹导入" onAction="#handleImportFromFolder" />
                         <MenuItem text="导出图片" onAction="#handleExportImages" />
                         <SeparatorMenuItem />
                         <MenuItem text="退出" onAction="#handleExit" />
@@ -43,8 +44,9 @@
             <!-- 左侧面板：图片列表 -->
             <AnchorPane minWidth="250">
                 <SplitPane.resizableWithParent>false</SplitPane.resizableWithParent>
-                <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+                <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">      
                     <Button text="导入图片" onAction="#handleImportImages" prefWidth="Infinity" />
+                    <Button text="从文件夹导入" onAction="#handleImportFromFolder" prefWidth="Infinity" />
                     <Button text="批量添加水印" onAction="#handleBatchWatermark" prefWidth="Infinity" />
                     <Separator />
                     <Label text="已导入图片：" />

@@ -34,11 +34,17 @@ public class ImageListCell extends ListCell<ImageFile> {
             Image image = new Image(item.getFile().toURI().toString(), 60, 60, true, true);
             thumbnail.setImage(image);
             
-            // 创建文件名标签
+            // 创建文件名标签，优化长文件名的换行显示
             Label fileNameLabel = new Label(item.getFileName());
             fileNameLabel.setFont(Font.font(12));
-            fileNameLabel.setPrefWidth(200); // 设置足够的宽度显示文件名
-            fileNameLabel.setWrapText(true); // 允许文件名换行
+            fileNameLabel.setPrefWidth(200); // 设置合适的宽度以适应列表
+            fileNameLabel.setMaxWidth(Double.MAX_VALUE); // 允许标签填充可用空间
+            fileNameLabel.setWrapText(true); // 启用自动换行
+            fileNameLabel.setAlignment(javafx.geometry.Pos.CENTER_LEFT); // 左对齐文本
+            fileNameLabel.setMinHeight(60); // 设置最小高度以适应缩略图
+            
+            // 设置CSS样式以优化换行效果
+            fileNameLabel.setStyle("-fx-text-alignment: left; -fx-line-spacing: 2px;");
             
             // 将缩略图和文件名添加到布局中
             cellLayout.getChildren().addAll(thumbnail, fileNameLabel);
@@ -47,6 +53,9 @@ public class ImageListCell extends ListCell<ImageFile> {
             setGraphic(cellLayout);
             // 清空文本，因为我们使用图形显示所有内容
             setText(null);
+            
+            // 设置单元格的最小高度以确保内容完整显示
+            setMinHeight(70);
         }
     }
 }
