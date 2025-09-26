@@ -77,15 +77,15 @@
             <!-- 右侧面板：水印设置 -->
             <AnchorPane minWidth="350">
                 <SplitPane.resizableWithParent>false</SplitPane.resizableWithParent>
-                <VBox spacing="0" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+                <VBox spacing="0" style="-fx-padding: 15;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
                     <Label text="水印设置" style="-fx-font-weight: bold;" />
                     
-                    <!-- 文本水印设置：高度为窗口的1/2 -->
-                    <TitledPane text="文本水印设置" expanded="true" prefHeight="300" minHeight="300">
+                    <!-- 文本水印设置：响应式高度 -->
+                    <TitledPane text="文本水印设置" expanded="true" VBox.vgrow="ALWAYS">
                         <SplitPane.resizableWithParent>true</SplitPane.resizableWithParent>
                         <ScrollPane fitToWidth="true" fitToHeight="false" prefHeight="-1">
                             <content>
-                                <VBox spacing="10" prefWidth="Infinity">
+                                <VBox spacing="10" prefWidth="Infinity" style="-fx-padding: 15;">
                                     <HBox alignment="CENTER_LEFT" fillHeight="true">
                                         <Label text="文本内容：" prefWidth="80" />
                                         <TextField fx:id="watermarkText" promptText="输入水印文本" prefWidth="150" minWidth="150" HBox.hgrow="ALWAYS" />
@@ -161,12 +161,12 @@
                         </ScrollPane>
                     </TitledPane>
 
-                    <!-- 图片水印设置：高度为窗口的1/2 -->
-                    <TitledPane text="图片水印设置" expanded="true" prefHeight="300" minHeight="300">
+                    <!-- 图片水印设置：响应式高度 -->
+                    <TitledPane text="图片水印设置" expanded="true" VBox.vgrow="ALWAYS">
                         <SplitPane.resizableWithParent>true</SplitPane.resizableWithParent>
                         <ScrollPane fitToWidth="true" fitToHeight="false" prefHeight="-1">
                             <content>
-                                <VBox spacing="10" prefWidth="Infinity">
+                                <VBox spacing="10" prefWidth="Infinity" style="-fx-padding: 15;">
                                     <HBox alignment="CENTER_LEFT" fillHeight="true">
                                         <Label text="水印图片：" prefWidth="80" />
                                         <Button text="选择水印图片" fx:id="selectWatermarkImageBtn" disable="false" 
