@@ -181,27 +181,20 @@ public class CombinedWatermarkProcessor {
         // 保存当前变换状态
         AffineTransform originalTransform = g2d.getTransform();
         
-        if (rotation != 0) {
-            // 计算旋转后的边界
-            double radians = Math.toRadians(rotation);
-            double sin = Math.abs(Math.sin(radians));
-            double cos = Math.abs(Math.cos(radians));
-            int newWidth = (int) Math.floor(wmWidth * cos + wmHeight * sin);
-            int newHeight = (int) Math.floor(wmHeight * cos + wmWidth * sin);
-            
-            // 平铺绘制水印
-            for (int x = -newWidth; x < image.getWidth() + newWidth; x += newWidth) {
-                for (int y = -newHeight; y < image.getHeight() + newHeight; y += newHeight) {
-                    AffineTransform transform = new AffineTransform();
-                    transform.translate(x + newWidth / 2, y + newHeight / 2);
-                    transform.rotate(radians);
-                    g2d.drawImage(watermarkImage, transform, null);
-                }
-            }
-        } else {
-            // 平铺绘制水印
-            for (int x = 0; x < image.getWidth(); x += wmWidth * 2) {
-                for (int y = 0; y < image.getHeight(); y += wmHeight * 2) {
+        // 平铺绘制水印，每个水印绕自己的中心旋转
+        for (int x = -wmWidth; x < image.getWidth() + wmWidth; x += wmWidth * 2) {
+            for (int y = -wmHeight; y < image.getHeight() + wmHeight; y += wmHeight * 2) {
+                // 保存当前变换状态
+                AffineTransform tileTransform = new AffineTransform(originalTransform);
+                g2d.setTransform(tileTransform);
+                
+                if (rotation != 0) {
+                    // 移动到水印位置，然后绕水印中心旋转
+                    g2d.translate(x + wmWidth / 2, y + wmHeight / 2);
+                    g2d.rotate(Math.toRadians(rotation));
+                    g2d.drawImage(watermarkImage, -wmWidth / 2, -wmHeight / 2, null);
+                } else {
+                    // 不旋转，直接绘制
                     g2d.drawImage(watermarkImage, x, y, null);
                 }
             }

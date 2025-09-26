@@ -212,34 +212,63 @@ public class TextWatermarkProcessor {
         // 保存当前变换状态
         AffineTransform originalTransform = g2d.getTransform();
         
-        if (rotation != 0) {
-            g2d.rotate(Math.toRadians(rotation));
-        }
-        
-        // 平铺绘制水印
+        // 平铺绘制水印，每个水印绕自己的中心旋转
         for (int x = -tileWidth; x < image.getWidth() + tileWidth; x += tileWidth) {
             for (int y = -tileHeight; y < image.getHeight() + tileHeight; y += tileHeight) {
-                if (shadow) {
-                    // 添加阴影
-                    g2d.setColor(new Color(0, 0, 0, 100));
+                // 保存当前变换状态
+                AffineTransform tileTransform = new AffineTransform(originalTransform);
+                g2d.setTransform(tileTransform);
+                
+                if (rotation != 0) {
+                    // 移动到水印位置，然后绕水印中心旋转
+                    g2d.translate(x + textWidth / 2, y + metrics.getAscent() - textHeight / 2);
+                    g2d.rotate(Math.toRadians(rotation));
+                    
+                    if (shadow) {
+                        // 添加阴影
+                        g2d.setColor(new Color(0, 0, 0, 100));
+                        if (stroke) {
+                            g2d.setStroke(new BasicStroke(2));
+                            g2d.drawString(text, -textWidth / 2 + 2, textHeight / 2 - metrics.getDescent() + 2);
+                            g2d.setStroke(new BasicStroke(1));
+                        }
+                        g2d.drawString(text, -textWidth / 2 + 2, textHeight / 2 - metrics.getDescent() + 2);
+                        g2d.setColor(color);
+                    }
+                    
+                    // 绘制描边
                     if (stroke) {
                         g2d.setStroke(new BasicStroke(2));
-                        g2d.drawString(text, x + 2, y + 2 + metrics.getAscent());
+                        g2d.drawString(text, -textWidth / 2, textHeight / 2 - metrics.getDescent());
                         g2d.setStroke(new BasicStroke(1));
                     }
-                    g2d.drawString(text, x + 2, y + 2 + metrics.getAscent());
-                    g2d.setColor(color);
-                }
-                
-                // 绘制描边
-                if (stroke) {
-                    g2d.setStroke(new BasicStroke(2));
+                    
+                    // 绘制文本
+                    g2d.drawString(text, -textWidth / 2, textHeight / 2 - metrics.getDescent());
+                } else {
+                    // 不旋转
+                    if (shadow) {
+                        // 添加阴影
+                        g2d.setColor(new Color(0, 0, 0, 100));
+                        if (stroke) {
+                            g2d.setStroke(new BasicStroke(2));
+                            g2d.drawString(text, x + 2, y + metrics.getAscent() + 2);
+                            g2d.setStroke(new BasicStroke(1));
+                        }
+                        g2d.drawString(text, x + 2, y + metrics.getAscent() + 2);
+                        g2d.setColor(color);
+                    }
+                    
+                    // 绘制描边
+                    if (stroke) {
+                        g2d.setStroke(new BasicStroke(2));
+                        g2d.drawString(text, x, y + metrics.getAscent());
+                        g2d.setStroke(new BasicStroke(1));
+                    }
+                    
+                    // 绘制文本
                     g2d.drawString(text, x, y + metrics.getAscent());
-                    g2d.setStroke(new BasicStroke(1));
                 }
-                
-                // 绘制文本
-                g2d.drawString(text, x, y + metrics.getAscent());
             }
         }
         

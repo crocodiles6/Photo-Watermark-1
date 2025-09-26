@@ -180,6 +180,11 @@ public class MainController {
             updatePreviewIfPossible();
         });
         
+        // 图片水印平铺效果实时预览
+        enableImageTiling.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            updatePreviewIfPossible();
+        });
+        
         textFontSizeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             textFontSizeValue.setText(String.format("%.0f", newVal));
             updatePreviewIfPossible();
