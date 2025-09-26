@@ -60,8 +60,67 @@ public class TextWatermarkProcessor {
             // 平铺水印
             drawTiledTextWatermark(g2d, originalImage, text, font, color, rotation, shadow, stroke);
         } else {
-            // 单一水印
-            drawSingleTextWatermark(g2d, originalImage, text, font, color, position, rotation, shadow, stroke);
+            // 单一水印，对于CUSTOM位置，默认使用(0.5, 0.5)即中心位置
+            double customX = 0.5;
+            double customY = 0.5;
+            drawSingleTextWatermark(g2d, originalImage, text, font, color, position, rotation, shadow, stroke, customX, customY);
+        }
+        
+        // 释放资源
+        g2d.dispose();
+        
+        return watermarkedImage;
+    }
+    
+    /**
+     * 添加文本水印（带自定义位置支持）
+     */
+    public BufferedImage addTextWatermark(
+            BufferedImage originalImage, 
+            String text, 
+            Color color, 
+            String fontFamily,
+            int fontSize, 
+            String positionStr, 
+            double rotation, 
+            boolean shadow, 
+            boolean stroke,
+            boolean tiling,
+            double customX, // 自定义X坐标 (0-1)
+            double customY  // 自定义Y坐标 (0-1)
+    ) {
+        // 创建可绘制的图像副本
+        BufferedImage watermarkedImage = new BufferedImage(
+                originalImage.getWidth(), 
+                originalImage.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB);
+        
+        // 获取图形上下文
+        Graphics2D g2d = watermarkedImage.createGraphics();
+        
+        // 设置高质量渲染
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        
+        // 绘制原始图像
+        g2d.drawImage(originalImage, 0, 0, null);
+        
+        // 设置字体
+        Font font = new Font(fontFamily, Font.BOLD, fontSize);
+        g2d.setFont(font);
+        
+        // 设置颜色（包含透明度）
+        g2d.setColor(color);
+        
+        // 获取Position枚举值
+        Position position = Position.valueOf(positionStr);
+        
+        if (tiling) {
+            // 平铺水印
+            drawTiledTextWatermark(g2d, originalImage, text, font, color, rotation, shadow, stroke);
+        } else {
+            // 单一水印，传递自定义位置
+            drawSingleTextWatermark(g2d, originalImage, text, font, color, position, rotation, shadow, stroke, customX, customY);
         }
         
         // 释放资源
@@ -82,7 +141,9 @@ public class TextWatermarkProcessor {
             Position position, 
             double rotation, 
             boolean shadow,
-            boolean stroke
+            boolean stroke,
+            double customX, // 自定义X坐标 (0-1)
+            double customY  // 自定义Y坐标 (0-1)
     ) {
         FontMetrics metrics = g2d.getFontMetrics(font);
         int textWidth = metrics.stringWidth(text);
@@ -92,44 +153,56 @@ public class TextWatermarkProcessor {
         int y = 0;
         
         // 根据位置计算坐标
-        switch (position) {
-            case TOP_LEFT:
-                x = margin;
-                y = margin + textHeight - metrics.getDescent();
-                break;
-            case TOP_CENTER:
-                x = (image.getWidth() - textWidth) / 2;
-                y = margin + textHeight - metrics.getDescent();
-                break;
-            case TOP_RIGHT:
-                x = image.getWidth() - textWidth - margin;
-                y = margin + textHeight - metrics.getDescent();
-                break;
-            case CENTER_LEFT:
-                x = margin;
-                y = (image.getHeight() + textHeight) / 2 - metrics.getDescent();
-                break;
-            case CENTER:
-                x = (image.getWidth() - textWidth) / 2;
-                y = (image.getHeight() + textHeight) / 2 - metrics.getDescent();
-                break;
-            case CENTER_RIGHT:
-                x = image.getWidth() - textWidth - margin;
-                y = (image.getHeight() + textHeight) / 2 - metrics.getDescent();
-                break;
-            case BOTTOM_LEFT:
-                x = margin;
-                y = image.getHeight() - margin - metrics.getDescent();
-                break;
-            case BOTTOM_CENTER:
-                x = (image.getWidth() - textWidth) / 2;
-                y = image.getHeight() - margin - metrics.getDescent();
-                break;
-            case BOTTOM_RIGHT:
-            default:
-                x = image.getWidth() - textWidth - margin;
-                y = image.getHeight() - margin - metrics.getDescent();
-                break;
+        if (position == Position.CUSTOM) {
+            // 使用自定义坐标
+            x = (int) (customX * (image.getWidth() - textWidth)) - margin / 2;
+            y = (int) (customY * (image.getHeight())) - margin / 2 + textHeight - metrics.getDescent();
+            
+            // 确保坐标在有效范围内
+            x = Math.max(margin, Math.min(x, image.getWidth() - textWidth - margin));
+            y = Math.max(margin + textHeight - metrics.getDescent(), 
+                        Math.min(y, image.getHeight() - margin - metrics.getDescent()));
+        } else {
+            // 使用预设位置
+            switch (position) {
+                case TOP_LEFT:
+                    x = margin;
+                    y = margin + textHeight - metrics.getDescent();
+                    break;
+                case TOP_CENTER:
+                    x = (image.getWidth() - textWidth) / 2;
+                    y = margin + textHeight - metrics.getDescent();
+                    break;
+                case TOP_RIGHT:
+                    x = image.getWidth() - textWidth - margin;
+                    y = margin + textHeight - metrics.getDescent();
+                    break;
+                case CENTER_LEFT:
+                    x = margin;
+                    y = (image.getHeight() + textHeight) / 2 - metrics.getDescent();
+                    break;
+                case CENTER:
+                    x = (image.getWidth() - textWidth) / 2;
+                    y = (image.getHeight() + textHeight) / 2 - metrics.getDescent();
+                    break;
+                case CENTER_RIGHT:
+                    x = image.getWidth() - textWidth - margin;
+                    y = (image.getHeight() + textHeight) / 2 - metrics.getDescent();
+                    break;
+                case BOTTOM_LEFT:
+                    x = margin;
+                    y = image.getHeight() - margin - metrics.getDescent();
+                    break;
+                case BOTTOM_CENTER:
+                    x = (image.getWidth() - textWidth) / 2;
+                    y = image.getHeight() - margin - metrics.getDescent();
+                    break;
+                case BOTTOM_RIGHT:
+                default:
+                    x = image.getWidth() - textWidth - margin;
+                    y = image.getHeight() - margin - metrics.getDescent();
+                    break;
+            }
         }
         
         // 保存当前变换状态

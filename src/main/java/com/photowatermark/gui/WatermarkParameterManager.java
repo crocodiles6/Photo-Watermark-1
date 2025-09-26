@@ -39,6 +39,16 @@ public class WatermarkParameterManager {
     private WatermarkPosition imageWatermarkPosition = WatermarkPosition.TOP_LEFT;
     private final BooleanProperty parametersChanged = new SimpleBooleanProperty(false);
     
+    // 自定义位置坐标（百分比表示，相对于图片尺寸）
+    private double customTextWatermarkX = 1.0; // 默认右下角
+    private double customTextWatermarkY = 1.0;
+    private double customImageWatermarkX = 0.0; // 默认左上角
+    private double customImageWatermarkY = 0.0;
+    
+    // 是否使用自定义位置
+    private boolean useCustomTextPosition = false;
+    private boolean useCustomImagePosition = false;
+    
     public WatermarkParameterManager(
             TextField watermarkText,
             ComboBox<String> fontFamilyComboBox,
@@ -190,6 +200,8 @@ public class WatermarkParameterManager {
     
     public void setTextWatermarkPosition(WatermarkPosition position) {
         this.textWatermarkPosition = position;
+        // 当设置预设位置时，关闭自定义位置
+        this.useCustomTextPosition = false;
         parametersChanged.set(true);
     }
     
@@ -199,6 +211,81 @@ public class WatermarkParameterManager {
     
     public void setImageWatermarkPosition(WatermarkPosition position) {
         this.imageWatermarkPosition = position;
+        // 当设置预设位置时，关闭自定义位置
+        this.useCustomImagePosition = false;
+        parametersChanged.set(true);
+    }
+    
+    // 自定义位置相关方法
+    public boolean isUseCustomTextPosition() {
+        return useCustomTextPosition;
+    }
+    
+    public void setUseCustomTextPosition(boolean useCustomTextPosition) {
+        this.useCustomTextPosition = useCustomTextPosition;
+        parametersChanged.set(true);
+    }
+    
+    public double getCustomTextWatermarkX() {
+        return customTextWatermarkX;
+    }
+    
+    public void setCustomTextWatermarkX(double customTextWatermarkX) {
+        this.customTextWatermarkX = customTextWatermarkX;
+        this.useCustomTextPosition = true;
+        parametersChanged.set(true);
+    }
+    
+    public double getCustomTextWatermarkY() {
+        return customTextWatermarkY;
+    }
+    
+    public void setCustomTextWatermarkY(double customTextWatermarkY) {
+        this.customTextWatermarkY = customTextWatermarkY;
+        this.useCustomTextPosition = true;
+        parametersChanged.set(true);
+    }
+    
+    public void setCustomTextWatermarkPosition(double x, double y) {
+        this.customTextWatermarkX = x;
+        this.customTextWatermarkY = y;
+        this.useCustomTextPosition = true;
+        parametersChanged.set(true);
+    }
+    
+    public boolean isUseCustomImagePosition() {
+        return useCustomImagePosition;
+    }
+    
+    public void setUseCustomImagePosition(boolean useCustomImagePosition) {
+        this.useCustomImagePosition = useCustomImagePosition;
+        parametersChanged.set(true);
+    }
+    
+    public double getCustomImageWatermarkX() {
+        return customImageWatermarkX;
+    }
+    
+    public void setCustomImageWatermarkX(double customImageWatermarkX) {
+        this.customImageWatermarkX = customImageWatermarkX;
+        this.useCustomImagePosition = true;
+        parametersChanged.set(true);
+    }
+    
+    public double getCustomImageWatermarkY() {
+        return customImageWatermarkY;
+    }
+    
+    public void setCustomImageWatermarkY(double customImageWatermarkY) {
+        this.customImageWatermarkY = customImageWatermarkY;
+        this.useCustomImagePosition = true;
+        parametersChanged.set(true);
+    }
+    
+    public void setCustomImageWatermarkPosition(double x, double y) {
+        this.customImageWatermarkX = x;
+        this.customImageWatermarkY = y;
+        this.useCustomImagePosition = true;
         parametersChanged.set(true);
     }
     
@@ -209,8 +296,10 @@ public class WatermarkParameterManager {
         // 清除文本水印内容
         watermarkText.clear();
         useExifDate.setSelected(false);
+        useCustomTextPosition = false;
         
         // 清除图片水印内容
         watermarkImageFile = null;
+        useCustomImagePosition = false;
     }
 }

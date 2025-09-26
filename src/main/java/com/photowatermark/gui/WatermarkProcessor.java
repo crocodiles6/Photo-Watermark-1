@@ -122,7 +122,8 @@ public class WatermarkProcessor {
                         imageOpacity,
                         parameterManager.getImageWatermarkPosition().name(),
                         imageRotation,
-                        imageTiling
+                        imageTiling,
+                        imageFileManager.getSelectedImageFile()
                 );
             }
             

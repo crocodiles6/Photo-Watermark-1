@@ -63,7 +63,7 @@
                                 <content>
                                     <AnchorPane onDragOver="#handleDragOver" onDragDropped="#handleDragDropped">
                                         <children>
-                                            <ImageView fx:id="previewImageView" preserveRatio="true" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" />
+                                            <ImageView fx:id="previewImageView" preserveRatio="true" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" onMousePressed="#handleMousePressed" onMouseDragged="#handleMouseDragged" onMouseReleased="#handleMouseReleased" />
                                         </children>
                                     </AnchorPane>
                                 </content>
@@ -159,6 +159,9 @@
                                         <Button text="右下" onAction="#setTextWatermarkPosition" userData="BOTTOM_RIGHT" prefWidth="60" />
                                     </HBox>
                                     <HBox>
+                                        <CheckBox fx:id="enableTextCustomPosition" text="自定义位置（在预览区域拖拽调整）" />
+                                    </HBox>
+                                    <HBox>
                                         <CheckBox fx:id="enableTextTiling" text="平铺水印" />
                                     </HBox>
                                 </VBox>
@@ -214,6 +217,9 @@
                                         <Button text="左下" onAction="#setImageWatermarkPosition" userData="BOTTOM_LEFT" prefWidth="60" />
                                         <Button text="下中" onAction="#setImageWatermarkPosition" userData="BOTTOM_CENTER" prefWidth="60" />
                                         <Button text="右下" onAction="#setImageWatermarkPosition" userData="BOTTOM_RIGHT" prefWidth="60" />
+                                    </HBox>
+                                    <HBox>
+                                        <CheckBox fx:id="enableImageCustomPosition" text="自定义位置（在预览区域拖拽调整）" />
                                     </HBox>
                                     <HBox>
                                         <CheckBox fx:id="enableImageTiling" text="平铺水印" />

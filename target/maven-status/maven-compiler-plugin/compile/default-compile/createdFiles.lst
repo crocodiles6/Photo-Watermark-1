@@ -22,5 +22,6 @@ com\photowatermark\Position.class
 com\photowatermark\gui\WatermarkPosition.class
 com\photowatermark\gui\ImageFileManager.class
 com\photowatermark\ImageWatermarkProcessor.class
+com\photowatermark\CustomPositionImageFile.class
 com\photowatermark\gui\ExportManager.class
 com\photowatermark\gui\WatermarkParameterManager.class

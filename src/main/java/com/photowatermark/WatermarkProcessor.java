@@ -61,7 +61,7 @@ public class WatermarkProcessor {
     }
     
     /**
-     * 添加文本水印（新方法，支持更多参数）
+     * 添加文本水印（新方法，支持字体和描边）
      */
     public BufferedImage addTextWatermark(
             BufferedImage originalImage, 
@@ -86,6 +86,39 @@ public class WatermarkProcessor {
                 shadow, 
                 stroke,
                 tiling
+        );
+    }
+    
+    /**
+     * 添加文本水印（带自定义位置支持）
+     */
+    public BufferedImage addTextWatermark(
+            BufferedImage originalImage, 
+            String text, 
+            Color color, 
+            String fontFamily,
+            int fontSize, 
+            String positionStr, 
+            double rotation, 
+            boolean shadow, 
+            boolean stroke,
+            boolean tiling,
+            double customX, 
+            double customY
+    ) {
+        return textProcessor.addTextWatermark(
+                originalImage, 
+                text, 
+                color, 
+                fontFamily,
+                fontSize, 
+                positionStr, 
+                rotation, 
+                shadow, 
+                stroke,
+                tiling,
+                customX,
+                customY
         );
     }
     
@@ -118,7 +151,7 @@ public class WatermarkProcessor {
     }
     
     /**
-     * 添加图片水印（新方法，支持缩放参数）
+     * 添加图片水印（新方法，支持缩放）
      */
     public BufferedImage addImageWatermark(
             BufferedImage originalImage, 
@@ -130,13 +163,40 @@ public class WatermarkProcessor {
             boolean tiling
     ) {
         return imageProcessor.addImageWatermark(
-                originalImage, 
-                watermarkImage, 
+                originalImage,
+                watermarkImage,
                 scale,
-                opacity, 
-                positionStr, 
-                rotation, 
+                opacity,
+                positionStr,
+                rotation,
                 tiling
+        );
+    }
+    
+    /**
+     * 添加图片水印（带自定义位置支持）
+     */
+    public BufferedImage addImageWatermark(
+            BufferedImage originalImage, 
+            BufferedImage watermarkImage, 
+            float scale,
+            float opacity, 
+            String positionStr, 
+            double rotation, 
+            boolean tiling,
+            double customX,
+            double customY
+    ) {
+        return imageProcessor.addImageWatermark(
+                originalImage,
+                watermarkImage,
+                scale,
+                opacity,
+                positionStr,
+                rotation,
+                tiling,
+                customX,
+                customY
         );
     }
     

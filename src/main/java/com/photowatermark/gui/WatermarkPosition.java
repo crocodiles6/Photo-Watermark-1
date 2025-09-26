@@ -6,5 +6,6 @@ package com.photowatermark.gui;
 public enum WatermarkPosition {
     TOP_LEFT, TOP_CENTER, TOP_RIGHT,
     CENTER_LEFT, CENTER, CENTER_RIGHT,
-    BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
+    BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT,
+    CUSTOM
 }

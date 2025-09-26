@@ -1,6 +1,8 @@
 package com.photowatermark.gui;
 
+import com.photowatermark.CustomPositionImageFile;
 import com.photowatermark.WatermarkProcessor;
+import com.photowatermark.Position;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -39,6 +41,34 @@ public class WatermarkService {
             }
         }
         
+        // 如果是自定义位置，需要获取自定义坐标
+        if (position.equals(Position.CUSTOM.name())) {
+            // 从ImageFile中获取自定义坐标
+            double customX = 0.5; // 默认中心位置
+            double customY = 0.5;
+            if (imageFile instanceof CustomPositionImageFile) {
+                CustomPositionImageFile customFile = (CustomPositionImageFile) imageFile;
+                customX = customFile.getCustomTextWatermarkX();
+                customY = customFile.getCustomTextWatermarkY();
+            }
+            
+            // 调用支持自定义位置的处理器方法
+            return processor.addTextWatermark(
+                    baseImage,
+                    watermarkText,
+                    color,
+                    fontFamily,
+                    fontSize,
+                    position,
+                    rotation,
+                    shadow,
+                    stroke,
+                    tiling,
+                    customX,
+                    customY
+            );
+        }
+        
         // 调用处理器添加文本水印
         return processor.addTextWatermark(
                 baseImage,
@@ -59,12 +89,39 @@ public class WatermarkService {
      */
     public BufferedImage applyImageWatermark(BufferedImage baseImage, File watermarkImageFile, 
                                           float scale, float opacity, String position, 
-                                          double rotation, boolean tiling) throws IOException {
+                                          double rotation, boolean tiling, ImageFile imageFile) throws IOException {
         if (watermarkImageFile == null || !watermarkImageFile.exists()) {
             throw new IOException("水印图片不存在");
         }
         
         BufferedImage watermarkImg = ImageIO.read(watermarkImageFile);
+        
+        // 如果是自定义位置，需要获取自定义坐标
+        if (position.equals(Position.CUSTOM.name())) {
+            // 默认使用中心位置
+            double customX = 0.5;
+            double customY = 0.5;
+            
+            // 从ImageFile中获取自定义坐标
+            if (imageFile instanceof CustomPositionImageFile) {
+                CustomPositionImageFile customFile = (CustomPositionImageFile) imageFile;
+                customX = customFile.getCustomImageWatermarkX();
+                customY = customFile.getCustomImageWatermarkY();
+            }
+            
+            // 调用支持自定义位置的处理器方法
+            return processor.addImageWatermark(
+                    baseImage,
+                    watermarkImg,
+                    scale,
+                    opacity,
+                    position,
+                    rotation,
+                    tiling,
+                    customX,
+                    customY
+            );
+        }
         
         // 调用处理器添加图片水印
         return processor.addImageWatermark(

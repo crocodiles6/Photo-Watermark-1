@@ -221,6 +221,13 @@ public class ImageFileManager {
     }
     
     /**
+     * 获取预览ImageView
+     */
+    public ImageView getPreviewImageView() {
+        return previewImageView;
+    }
+    
+    /**
      * 设置图片选择变化回调
      */
     public void setOnImageSelectedCallback(Consumer<ImageFile> callback) {
