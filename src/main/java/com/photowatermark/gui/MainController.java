@@ -155,6 +155,31 @@ public class MainController {
      * 绑定滑块与标签
      */
     private void bindSliderLabels() {
+        // 文本水印内容实时预览
+        watermarkText.textProperty().addListener((obs, oldVal, newVal) -> {
+            updatePreviewIfPossible();
+        });
+        
+        // 字体样式实时预览
+        fontFamilyComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            updatePreviewIfPossible();
+        });
+        
+        // 文本颜色实时预览
+        textColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            updatePreviewIfPossible();
+        });
+        
+        // 文本水印阴影效果实时预览
+        enableShadow.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            updatePreviewIfPossible();
+        });
+        
+        // 文本水印平铺效果实时预览
+        enableTextTiling.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            updatePreviewIfPossible();
+        });
+        
         textFontSizeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             textFontSizeValue.setText(String.format("%.0f", newVal));
             updatePreviewIfPossible();
@@ -414,7 +439,16 @@ public class MainController {
      */
     private void updatePreviewIfPossible() {
         if (imageFileManager.hasSelectedImage()) {
-            watermarkProcessor.applyWatermark();
+            // 检查是否有水印内容
+            boolean hasTextWatermark = parameterManager.hasTextWatermark();
+            boolean hasImageWatermark = parameterManager.hasImageWatermark();
+            
+            // 如果文本水印为空且没有图片水印，清空预览
+            if (!hasTextWatermark && !hasImageWatermark) {
+                imageFileManager.clearWatermark();
+            } else {
+                watermarkProcessor.applyWatermark();
+            }
         }
     }
 }
