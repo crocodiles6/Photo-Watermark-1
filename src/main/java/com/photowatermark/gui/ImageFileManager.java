@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +33,9 @@ public class ImageFileManager {
     
     // 服务类
     private final ImageConverter imageConverter;
+    
+    // 图片选择变化回调
+    private Consumer<ImageFile> onImageSelectedCallback;
     
     // 支持的图片文件扩展名
     private static final List<String> SUPPORTED_IMAGE_EXTENSIONS = Arrays.asList(
@@ -63,6 +67,11 @@ public class ImageFileManager {
             Platform.runLater(() -> previewImageView.setImage(fxImage));
             
             uiUtils.updateStatus("已加载: " + imageFile.getFileName());
+            
+            // 调用图片选择回调
+            if (onImageSelectedCallback != null) {
+                Platform.runLater(() -> onImageSelectedCallback.accept(imageFile));
+            }
         } catch (IOException e) {
             uiUtils.showError("加载图片失败", "无法加载图片: " + e.getMessage());
             e.printStackTrace();
@@ -209,5 +218,12 @@ public class ImageFileManager {
     
     public boolean hasSelectedImage() {
         return selectedImageFileProperty.get() != null && originalImage != null;
+    }
+    
+    /**
+     * 设置图片选择变化回调
+     */
+    public void setOnImageSelectedCallback(Consumer<ImageFile> callback) {
+        this.onImageSelectedCallback = callback;
     }
 }

@@ -47,7 +47,7 @@
                 <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">      
                     <Button text="导入图片" onAction="#handleImportImages" prefWidth="Infinity" />
                     <Button text="从文件夹导入" onAction="#handleImportFromFolder" prefWidth="Infinity" />
-                    <Button text="批量添加水印" onAction="#handleBatchWatermark" prefWidth="Infinity" />
+                    
                     <Separator />
                     <Label text="已导入图片：" />
                     <ListView fx:id="imageListView" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS" />

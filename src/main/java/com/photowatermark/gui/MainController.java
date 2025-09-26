@@ -92,6 +92,13 @@ public class MainController {
         );
         
         this.imageFileManager = new ImageFileManager(previewImageView, uiUtils, imageConverter);
+        
+        // 设置图片选择变化回调，当切换图片时自动应用水印
+        imageFileManager.setOnImageSelectedCallback(imageFile -> {
+            // 检查是否有水印参数设置，如果有，自动更新预览
+            updatePreviewIfPossible();
+        });
+        
         this.watermarkProcessor = new WatermarkProcessor(
                 watermarkService, parameterManager, imageFileManager, uiUtils, executorService
         );
@@ -296,30 +303,6 @@ public class MainController {
         }
     }
 
-    /**
-     * 处理批量添加水印
-     */
-    @FXML
-    private void handleBatchWatermark(ActionEvent event) {
-        if (imageFileManager.getImageFiles().isEmpty()) {
-            uiUtils.showWarning("无图片", "请先导入图片");
-            return;
-        }
-
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("选择导出目录");
-        File exportDir = fileChooser.showSaveDialog(null);
-        if (exportDir != null) {
-            // 确保是目录
-            if (!exportDir.isDirectory()) {
-                exportDir = exportDir.getParentFile();
-            }
-            
-            if (exportDir != null && watermarkProcessor.validateWatermarkParameters()) {
-                watermarkProcessor.batchApplyWatermark(exportDir);
-            }
-        }
-    }
 
     /**
      * 设置文本水印位置
