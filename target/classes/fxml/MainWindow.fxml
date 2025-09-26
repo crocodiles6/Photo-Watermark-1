@@ -22,10 +22,10 @@
                         <MenuItem text="退出" onAction="#handleExit" />
                     </items>
                 </Menu>
-                <Menu text="编辑">
+                <Menu text="水印模板">
                     <items>
-                        <MenuItem text="保存水印模板" onAction="#handleSaveTemplate" />
-                        <MenuItem text="加载水印模板" onAction="#handleLoadTemplate" />
+                        <MenuItem text="水印模板管理" onAction="#handleSaveTemplate" />
+                        <!-- <MenuItem text="加载水印模板" onAction="#handleLoadTemplate" /> -->
                     </items>
                 </Menu>
                 <Menu text="帮助">

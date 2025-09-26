@@ -5,6 +5,7 @@ com\photowatermark\WatermarkProcessor.class
 com\photowatermark\gui\WatermarkService.class
 com\photowatermark\InputParser.class
 com\photowatermark\CombinedWatermarkProcessor.class
+com\photowatermark\gui\WatermarkTemplateManager.class
 com\photowatermark\CombinedWatermarkProcessor$1.class
 com\photowatermark\TextWatermarkProcessor$1.class
 com\photowatermark\gui\UiUtils.class
@@ -15,6 +16,8 @@ com\photowatermark\gui\ImageFile.class
 com\photowatermark\gui\MainApp.class
 com\photowatermark\gui\WatermarkProcessor.class
 com\photowatermark\ExifExtractor.class
+com\photowatermark\gui\WatermarkTemplate.class
+com\photowatermark\gui\TemplateDialog.class
 com\photowatermark\gui\ExportDialog$ExportDialogResult.class
 com\photowatermark\gui\ImageConverter.class
 com\photowatermark\PhotoWatermarkApp.class
@@ -23,5 +26,6 @@ com\photowatermark\gui\WatermarkPosition.class
 com\photowatermark\gui\ImageFileManager.class
 com\photowatermark\ImageWatermarkProcessor.class
 com\photowatermark\CustomPositionImageFile.class
+com\photowatermark\gui\TemplateDialog$OnTemplateSelectedListener.class
 com\photowatermark\gui\ExportManager.class
 com\photowatermark\gui\WatermarkParameterManager.class

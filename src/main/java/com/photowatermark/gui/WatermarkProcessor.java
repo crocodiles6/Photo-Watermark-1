@@ -62,19 +62,19 @@ public class WatermarkProcessor {
             }
             
             // 准备文本水印参数
-            String fontFamily = parameterManager.getFontFamily();
-            int fontSize = parameterManager.getFontSize();
-            javafx.scene.paint.Color color = parameterManager.getTextColor();
-            float textOpacity = parameterManager.getTextOpacity();
-            double textRotation = parameterManager.getTextRotation();
+            String fontFamily = parameterManager.getFontFamilyValue();
+            int fontSize = parameterManager.getFontSizeValue();
+            javafx.scene.paint.Color color = parameterManager.getTextColorValue();
+            float textOpacity = parameterManager.getTextOpacityValue();
+            double textRotation = parameterManager.getTextRotationValue();
             boolean shadow = parameterManager.isShadowEnabled();
             boolean stroke = parameterManager.isStrokeEnabled();
             boolean textTiling = parameterManager.isTextTilingEnabled();
             
             // 准备图片水印参数
-            float imageScale = parameterManager.getImageScale();
-            float imageOpacity = parameterManager.getImageOpacity();
-            double imageRotation = parameterManager.getImageRotation();
+            float imageScale = parameterManager.getImageScaleValue();
+            float imageOpacity = parameterManager.getImageOpacityValue();
+            double imageRotation = parameterManager.getImageRotationValue();
             boolean imageTiling = parameterManager.isImageTilingEnabled();
             
             // 转换JavaFX颜色为AWT颜色
@@ -99,7 +99,7 @@ public class WatermarkProcessor {
             if (hasTextWatermark) {
                 baseImage = watermarkService.applyTextWatermark(
                         baseImage,
-                        parameterManager.getWatermarkText(),
+                        parameterManager.getWatermarkTextValue(),
                         awtColor,
                         fontFamily,
                         fontSize,

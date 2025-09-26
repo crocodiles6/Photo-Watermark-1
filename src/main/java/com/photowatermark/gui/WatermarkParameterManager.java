@@ -128,28 +128,85 @@ public class WatermarkParameterManager {
         return watermarkImageFile != null && watermarkImageFile.exists();
     }
     
-    // Getter 方法
-    public String getWatermarkText() {
+    // Getter 方法 - 用于获取参数值
+    public String getWatermarkTextValue() {
         return watermarkText.getText();
     }
     
-    public String getFontFamily() {
+    // Getter 方法 - 用于获取GUI组件
+    public TextField getWatermarkText() {
+        return watermarkText;
+    }
+    
+    public ComboBox<String> getFontFamily() {
+        return fontFamilyComboBox;
+    }
+    
+    public Slider getFontSize() {
+        return textFontSizeSlider;
+    }
+    
+    public ColorPicker getTextColor() {
+        return textColorPicker;
+    }
+    
+    public Slider getTextOpacity() {
+        return textOpacitySlider;
+    }
+    
+    public Slider getTextRotation() {
+        return textRotationSlider;
+    }
+    
+    public CheckBox getEnableShadow() {
+        return enableShadow;
+    }
+    
+    public CheckBox getEnableStroke() {
+        return enableStroke;
+    }
+    
+    public CheckBox getUseExifDate() {
+        return useExifDate;
+    }
+    
+    public Slider getImageScale() {
+        return imageScaleSlider;
+    }
+    
+    public Slider getImageOpacity() {
+        return imageOpacitySlider;
+    }
+    
+    public Slider getImageRotation() {
+        return imageRotationSlider;
+    }
+    
+    public CheckBox getEnableTextTiling() {
+        return enableTextTiling;
+    }
+    
+    public CheckBox getEnableImageTiling() {
+        return enableImageTiling;
+    }
+    
+    public String getFontFamilyValue() {
         return fontFamilyComboBox.getValue() != null ? fontFamilyComboBox.getValue() : "Arial";
     }
     
-    public int getFontSize() {
+    public int getFontSizeValue() {
         return (int) textFontSizeSlider.getValue();
     }
     
-    public Color getTextColor() {
+    public Color getTextColorValue() {
         return textColorPicker.getValue();
     }
     
-    public float getTextOpacity() {
+    public float getTextOpacityValue() {
         return (float) textOpacitySlider.getValue();
     }
     
-    public double getTextRotation() {
+    public double getTextRotationValue() {
         return textRotationSlider.getValue();
     }
     
@@ -165,15 +222,15 @@ public class WatermarkParameterManager {
         return useExifDate.isSelected();
     }
     
-    public float getImageScale() {
+    public float getImageScaleValue() {
         return (float) imageScaleSlider.getValue();
     }
     
-    public float getImageOpacity() {
+    public float getImageOpacityValue() {
         return (float) imageOpacitySlider.getValue();
     }
     
-    public double getImageRotation() {
+    public double getImageRotationValue() {
         return imageRotationSlider.getValue();
     }
     

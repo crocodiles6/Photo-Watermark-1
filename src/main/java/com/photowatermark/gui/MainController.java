@@ -75,6 +75,7 @@ public class MainController {
     private ImageFileManager imageFileManager;
     private WatermarkProcessor watermarkProcessor;
     private ExportManager exportManager;
+    private WatermarkTemplateManager templateManager;
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(4);
     
@@ -661,6 +662,7 @@ public class MainController {
                 watermarkService, parameterManager, imageFileManager, uiUtils, executorService
         );
         this.exportManager = new ExportManager(uiUtils, imageConverter);
+        this.templateManager = new WatermarkTemplateManager();
         
         // 设置图片列表
         imageListView.setItems(imageFileManager.getImageFiles());
@@ -938,19 +940,36 @@ public class MainController {
     }
 
     /**
-     * 处理保存水印模板
+     * 处理水印模板管理（保存和加载）
      */
     @FXML
     private void handleSaveTemplate(ActionEvent event) {
-        uiUtils.showInfo("功能开发中", "水印模板保存功能正在开发中");
+        // 创建模板对话框
+        TemplateDialog templateDialog = new TemplateDialog(
+                parameterManager, 
+                templateManager, 
+                this::applyTemplateAndUpdatePreview
+        );
+        
+        // 显示对话框
+        templateDialog.show();
     }
-
+    
+    // /**
+    //  * 处理加载水印模板（复用相同的对话框）
+    //  */
+    // @FXML
+    // private void handleLoadTemplate(ActionEvent event) {
+    //     // 复用保存模板的方法，因为我们使用同一个对话框处理保存和加载
+    //     handleSaveTemplate(event);
+    // }
+    
     /**
-     * 处理加载水印模板
+     * 应用模板并更新预览
      */
-    @FXML
-    private void handleLoadTemplate(ActionEvent event) {
-        uiUtils.showInfo("功能开发中", "水印模板加载功能正在开发中");
+    private void applyTemplateAndUpdatePreview(WatermarkTemplate template) {
+        // 应用模板后，更新预览
+        updatePreviewIfPossible();
     }
 
     /**
