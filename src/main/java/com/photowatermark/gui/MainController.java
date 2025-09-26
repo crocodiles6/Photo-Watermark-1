@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -384,24 +385,53 @@ public class MainController {
      */
     @FXML
     private void handleExportImages(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("导出图片");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("PNG图片", "*.png"),
-                new FileChooser.ExtensionFilter("JPEG图片", "*.jpg", "*.jpeg"),
-                new FileChooser.ExtensionFilter("BMP图片", "*.bmp")
-        );
+        if (!imageFileManager.hasSelectedImage() || imageFileManager.getWatermarkedImage() == null) {
+            uiUtils.showWarning("无图片", "请先应用水印后再导出");
+            return;
+        }
         
-        // 设置默认文件名
-        fileChooser.setInitialFileName(exportManager.generateDefaultExportFileName(imageFileManager.getSelectedImageFile()));
+        // 创建并显示导出对话框
+        ExportDialog exportDialog = new ExportDialog(exportManager, imageFileManager.getSelectedImageFile());
+        ExportDialog.ExportDialogResult result = exportDialog.showDialog(previewImageView.getScene().getWindow());
         
-        File outputFile = fileChooser.showSaveDialog(null);
-        if (outputFile != null) {
-            exportManager.exportWatermarkedImage(
-                    imageFileManager.getWatermarkedImage(), 
-                    outputFile, 
-                    imageFileManager.getSelectedImageFile()
-            );
+        if (result.isConfirmed()) {
+            try {
+                // 生成最终的文件名（包含扩展名）
+                String finalFileName = exportManager.generateFileNameWithExtension(
+                        result.getFileName(), result.getFormat());
+                
+                // 创建完整的输出文件路径
+                File outputFile = new File(result.getExportDirectory(), finalFileName);
+                
+                // 检查文件是否已存在
+                if (outputFile.exists()) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("文件已存在");
+                    alert.setHeaderText(null);
+                    alert.setContentText("文件已存在，是否覆盖？");
+                    
+                    alert.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.OK) {
+                            // 执行导出
+                            exportManager.exportWatermarkedImage(
+                                    imageFileManager.getWatermarkedImage(),
+                                    outputFile,
+                                    imageFileManager.getSelectedImageFile()
+                            );
+                        }
+                    });
+                } else {
+                    // 文件不存在，直接导出
+                    exportManager.exportWatermarkedImage(
+                            imageFileManager.getWatermarkedImage(),
+                            outputFile,
+                            imageFileManager.getSelectedImageFile()
+                    );
+                }
+            } catch (Exception e) {
+                uiUtils.showError("导出失败", "导出过程中发生错误：" + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 

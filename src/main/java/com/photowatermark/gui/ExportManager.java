@@ -35,14 +35,33 @@ public class ExportManager {
                 extension = "JPEG";
             }
             
+            // 根据目标格式进行必要的格式转换
+            BufferedImage imageToExport = convertImageFormatIfNeeded(watermarkedImage, extension);
+            
             // 写入文件
-            ImageIO.write(watermarkedImage, extension, outputFile);
+            ImageIO.write(imageToExport, extension, outputFile);
             uiUtils.showInfo("导出成功", "图片已成功导出到：" + outputFile.getAbsolutePath());
             uiUtils.updateStatus("已导出图片：" + outputFile.getName());
         } catch (IOException e) {
             uiUtils.showError("导出失败", "无法导出图片：" + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * 根据目标格式转换图片格式（必要时）
+     * 特别是处理透明通道的情况
+     */
+    private BufferedImage convertImageFormatIfNeeded(BufferedImage source, String format) {
+        // 如果是JPEG格式且原图有alpha通道，需要转换为RGB模式
+        if ("JPEG".equals(format) && source.getColorModel().hasAlpha()) {
+            BufferedImage rgbImage = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
+            // 绘制白色背景
+            rgbImage.createGraphics().drawImage(source, 0, 0, null);
+            return rgbImage;
+        }
+        // 其他情况直接返回原图
+        return source;
     }
     
     /**
@@ -56,5 +75,33 @@ public class ExportManager {
         } else {
             return "watermarked_image.png";
         }
+    }
+    
+    /**
+     * 生成带指定扩展名的文件名
+     */
+    public String generateFileNameWithExtension(String baseName, String extension) {
+        if (baseName == null || baseName.trim().isEmpty()) {
+            // 如果没有指定基本文件名，使用默认名
+            return "watermarked_image." + extension.toLowerCase();
+        }
+        
+        // 确保扩展名前有.
+        if (!extension.startsWith(".")) {
+            extension = "." + extension.toLowerCase();
+        }
+        
+        // 如果文件名已经包含相同扩展名，直接返回
+        if (baseName.toLowerCase().endsWith(extension)) {
+            return baseName;
+        }
+        
+        // 移除已有的扩展名（如果有）并添加新扩展名
+        int lastDotIndex = baseName.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+            baseName = baseName.substring(0, lastDotIndex);
+        }
+        
+        return baseName + extension;
     }
 }
