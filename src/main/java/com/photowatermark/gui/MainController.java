@@ -1064,7 +1064,10 @@ public class MainController {
                 "   - 文本水印：设置文字内容、字体、大小、颜色、透明度等\n" +
                 "   - 图片水印：选择水印图片、设置缩放、透明度、旋转等\n" +
                 "3. 点击'应用水印'按钮预览效果\n" +
-                "4. 点击'导出图片'保存水印后的图片\n\n" +
+                "4. 点击'清除水印'按钮清除当前水印\n" +
+                "5. 点击'重置图片'按钮重置当前图片\n" +
+                "6. 点击菜单'水印模板'->'水印模板管理'保存、应用、删除水印模板\n" +
+                "7. 点击菜单'文件'->'导出图片'保存水印后的图片\n\n" +
                 "支持同时添加文本水印和图片水印，可独立设置各自的属性。");
     }
 
@@ -1073,9 +1076,9 @@ public class MainController {
      */
     @FXML
     private void handleAbout(ActionEvent event) {
-        uiUtils.showInfo("关于", "Photo Watermark 1.0\n\n" +
+        uiUtils.showInfo("关于", "Photo Watermark\n\n" +
                 "一个简单易用的图片水印工具\n" +
-                "NJUSE 2025 Fall LLM4SE hw1");
+                "NJUSE 2025 Fall LLM4SE hw");
     }
 
     /**
