@@ -109,6 +109,7 @@
                                         <Label text="字体大小：" prefWidth="80" />
                                         <Slider fx:id="textFontSizeSlider" min="12" max="72" value="24" showTickLabels="true" 
                                                 showTickMarks="true" majorTickUnit="12" prefWidth="150" />
+                                        <Region prefWidth="10" />
                                         <Label fx:id="textFontSizeValue" text="24" prefWidth="30" />
                                     </HBox>
                                     <HBox alignment="CENTER_LEFT" fillHeight="true">
@@ -119,12 +120,14 @@
                                         <Label text="透明度：" prefWidth="80" />
                                         <Slider fx:id="textOpacitySlider" min="0.1" max="1.0" value="0.5" 
                                                 showTickLabels="true" showTickMarks="true" majorTickUnit="0.1" prefWidth="150" />
+                                        <Region prefWidth="10" />
                                         <Label fx:id="textOpacityValue" text="0.5" prefWidth="40" />
                                     </HBox>
                                     <HBox alignment="CENTER_LEFT" fillHeight="true">
                                         <Label text="旋转角度：" prefWidth="80" />
                                         <Slider fx:id="textRotationSlider" min="0" max="360" value="0" 
                                                 showTickLabels="true" showTickMarks="true" majorTickUnit="45" prefWidth="150" />
+                                        <Region prefWidth="10" />
                                         <Label fx:id="textRotationValue" text="0°" prefWidth="40" />
                                     </HBox>
                                     <HBox>
@@ -176,18 +179,21 @@
                                         <Label text="缩放比例：" prefWidth="80" />
                                         <Slider fx:id="imageScaleSlider" min="0.1" max="2.0" value="1.0" 
                                                 showTickLabels="true" showTickMarks="true" majorTickUnit="0.2" prefWidth="150" />
+                                        <Region prefWidth="10" />
                                         <Label fx:id="imageScaleValue" text="1.0" prefWidth="40" />
                                     </HBox>
                                     <HBox alignment="CENTER_LEFT" fillHeight="true">
                                         <Label text="透明度：" prefWidth="80" />
                                         <Slider fx:id="imageOpacitySlider" min="0.1" max="1.0" value="0.5" 
                                                 showTickLabels="true" showTickMarks="true" majorTickUnit="0.1" prefWidth="150" />
+                                        <Region prefWidth="10" />
                                         <Label fx:id="imageOpacityValue" text="0.5" prefWidth="40" />
                                     </HBox>
                                     <HBox alignment="CENTER_LEFT" fillHeight="true">
                                         <Label text="旋转角度：" prefWidth="80" />
                                         <Slider fx:id="imageRotationSlider" min="0" max="360" value="0" 
                                                 showTickLabels="true" showTickMarks="true" majorTickUnit="45" prefWidth="150" />
+                                        <Region prefWidth="10" />
                                         <Label fx:id="imageRotationValue" text="0°" prefWidth="40" />
                                     </HBox>
                                     <!-- 图片水印位置设置 -->
