@@ -19,6 +19,7 @@ public class ExportDialog {
     private final ExportManager exportManager;
     private final ImageFile selectedImageFile;
     private String defaultFileName;
+    private String originalFileNameWithoutExtension;
     
     /**
      * 导出对话框结果类，封装用户的选择
@@ -68,6 +69,11 @@ public class ExportDialog {
         // 生成默认文件名（不包含扩展名）
         String defaultFullName = exportManager.generateDefaultExportFileName(selectedImageFile);
         this.defaultFileName = defaultFullName.substring(0, defaultFullName.lastIndexOf('.'));
+        
+        // 提取原始文件名（不包含扩展名）
+        String originalFileName = selectedImageFile.getFileName();
+        int dotIndex = originalFileName.lastIndexOf('.');
+        this.originalFileNameWithoutExtension = dotIndex > 0 ? originalFileName.substring(0, dotIndex) : originalFileName;
     }
     
     /**
@@ -117,6 +123,29 @@ public class ExportDialog {
         TextField fileNameField = new TextField(defaultFileName);
         fileNameField.setPromptText("输入文件名，不包含扩展名");
         
+        // 添加文件名设置选项
+        Label fileNameOptionLabel = new Label("文件名选项：");
+        Button originalNameButton = new Button("原文件名");
+        Button prefixButton = new Button("默认前缀");
+        Button suffixButton = new Button("默认后缀");
+        
+        // 设置按钮事件处理
+        originalNameButton.setOnAction(e -> {
+            fileNameField.setText(originalFileNameWithoutExtension);
+        });
+        
+        prefixButton.setOnAction(e -> {
+            fileNameField.setText("wm_" + originalFileNameWithoutExtension);
+        });
+        
+        suffixButton.setOnAction(e -> {
+            fileNameField.setText(originalFileNameWithoutExtension + "_watermarked");
+        });
+        
+        // 创建按钮容器
+        HBox fileNameOptionsBox = new HBox(10);
+        fileNameOptionsBox.getChildren().addAll(originalNameButton, prefixButton, suffixButton);
+        
         // 导出格式选择
         Label formatLabel = new Label("导出格式：");
         ComboBox<String> formatComboBox = new ComboBox<>();
@@ -157,9 +186,11 @@ public class ExportDialog {
         grid.add(directoryBox, 1, 0);
         grid.add(fileNameLabel, 0, 1);
         grid.add(fileNameField, 1, 1);
-        grid.add(formatLabel, 0, 2);
-        grid.add(formatComboBox, 1, 2);
-        grid.add(buttonBox, 1, 3);
+        grid.add(fileNameOptionLabel, 0, 2);
+        grid.add(fileNameOptionsBox, 1, 2);
+        grid.add(formatLabel, 0, 3);
+        grid.add(formatComboBox, 1, 3);
+        grid.add(buttonBox, 1, 4);
         
         // 设置列约束，使第二列可以水平扩展
         ColumnConstraints column1 = new ColumnConstraints();
